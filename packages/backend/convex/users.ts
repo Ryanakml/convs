@@ -1,4 +1,5 @@
 import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
 
 export const getUser = query({
   args: {},
@@ -9,10 +10,12 @@ export const getUser = query({
 });
 
 export const addUser = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
     const userId = await ctx.db.insert("users", {
-      name: "ryan",
+      name: args.name,
     });
     return userId;
   },

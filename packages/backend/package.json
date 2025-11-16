@@ -6,7 +6,8 @@
     "setup": "convex dev --until-success"
   },
   "exports": {
-    "./convex": "./convex/*.ts"
+    "./convex/*": "./convex/*",
+    "./_generated/*": "./convex/_generated/*"
   },
   "devDependencies": {
     "@workspace/typescript-config": "workspace:*",

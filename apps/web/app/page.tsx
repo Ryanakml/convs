@@ -11,8 +11,12 @@ export default function Page() {
     <div className="flex items-center justify-center min-h-svh">
       <div className="flex flex-col items-center justify-center gap-4">
         <h1 className="text-2xl font-bold">WEB APPS</h1>
-        <Button onClick={() => addUser()}>Add User Id</Button>
-        <p>{`user: ${JSON.stringify(users)}`}</p>
+        <Button onClick={() => addUser({name: "ryan"})}>Add User Id</Button>
+        <p>
+          {users === undefined
+            ? "Loading..."
+            : `user: ${JSON.stringify(users)}`}
+        </p>
       </div>
     </div>
   );
