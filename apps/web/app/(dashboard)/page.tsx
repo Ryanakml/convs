@@ -15,7 +15,17 @@ export default function Page() {
           <h1 className="text-2xl font-bold">WEB APPS</h1>
           <OrganizationSwitcher hidePersonal />
           <UserButton />
-          <Button onClick={() => addUser({ name: "ryan" })}>Add User Id</Button>
+          <Button
+            onClick={async () => {
+              try {
+                await addUser({ name: "ryan" });
+              } catch (error) {
+                console.error("Failed to add user:", error);
+              }
+            }}
+          >
+            Add User Id
+          </Button>
           <p>
             {users === undefined
               ? "Loading..."

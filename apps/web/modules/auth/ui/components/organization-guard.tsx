@@ -1,7 +1,6 @@
 "use client";
 
 import { useOrganization } from "@clerk/nextjs";
-import { AuthLayout } from "../layouts/auth-layouts";
 import { OrgsSelectionView } from "../views/orgs-select-view";
 
 export const OrganizationGuard = ({
