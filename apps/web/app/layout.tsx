@@ -25,9 +25,7 @@ export default function RootLayout({
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >
         <ClerkProvider>
-          <Providers>
-            <OrganizationGuard>{children}</OrganizationGuard>
-          </Providers>
+          <Providers>{children}</Providers>
         </ClerkProvider>
       </body>
     </html>
