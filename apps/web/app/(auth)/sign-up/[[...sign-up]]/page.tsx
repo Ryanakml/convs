@@ -1,7 +1,7 @@
-import { SignUp } from "@clerk/nextjs";
+import { SignUpView } from "@/modules/auth/ui/views/sign-up-view";
 
-const ComponentName = () => {
-  return <SignUp />;
+const SignUpPage = () => {
+  return <SignUpView />;
 };
 
-export default ComponentName;
+export default SignUpPage;

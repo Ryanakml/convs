@@ -84,6 +84,9 @@ importers:
 
   apps/widget:
     dependencies:
+      '@clerk/nextjs':
+        specifier: ^6.35.1
+        version: 6.35.1(next@15.4.5(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../packages/ui
