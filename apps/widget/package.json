@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.35.1",
+    "@vapi-ai/web": "^2.5.1",
     "@workspace/ui": "workspace:*",
     "convex": "^1.29.1",
     "lucide-react": "^0.475.0",
