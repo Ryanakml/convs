@@ -1,17 +1,29 @@
 "use client";
 
-import { WidgetFooter } from "../components/widget-footer";
-// import { WidgetHeader } from "../components/widget-header";
+import { useAtomValue } from "jotai";
 import { WidgetAuthScreen } from "../screens/widget-auth-screen";
+import { screenAtom } from "../../atoms/widget-atoms";
 
 interface Props {
   organizationId: string;
 }
 
 export const WidgetView = ({ organizationId }: Props) => {
+  const screen = useAtomValue(screenAtom);
+
+  const screenComponents = {
+    error: <div>Error Screen</div>,
+    loading: <div>Loading Screen</div>,
+    voice: <div>Voice Screen</div>,
+    auth: <WidgetAuthScreen />,
+    inbox: <div>Inbox Screen</div>,
+    chat: <div>Chat Screen</div>,
+    contact: <div>Contact Screen</div>,
+  };
+
   return (
     <main className="flex flex-col flex-1 gap-4 px-4 py-6">
-      <WidgetAuthScreen />
+      {screenComponents[screen]}
       {/* <div className="flex-1 rounded-2xl border bg-card p-4">
         Widget View: {organizationId}
       </div> */}
