@@ -23,7 +23,7 @@ export const WidgetFooter = () => {
         onClick={() => {}}
         className="h-14 rounded-none flex-1"
       >
-        <Inbox className={cn("size-5", screen === "ibox" && "text-primary")} />
+        <Inbox className={cn("size-5")} />
       </Button>
     </footer>
   );
