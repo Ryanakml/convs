@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "@workspace/ui/globals.css";
 import { Providers } from "@/components/providers";
 import { OrganizationGuard } from "@/modules/auth/ui/components/organization-guard";
+import "@workspace/ui/styles/globals.css";
 
 const fontSans = Geist({
   subsets: ["latin"],
