@@ -21,6 +21,7 @@ export const WidgetLoadingScreen = ({
 }: {
   organizationId: string | null;
 }) => {
+  const [hydrated, setHydrated] = useState(false);
   const [step, setStep] = useState<initStep>("org");
   const [sessionValid, setSessionValid] = useState(false);
   const setLoadingMessage = useSetAtom(loadingMessageAtom);
@@ -120,6 +121,12 @@ export const WidgetLoadingScreen = ({
     const hasValidSession = sessionValid;
     setScreen(hasValidSession ? "selection" : "auth");
   }, [step, sessionValid, setScreen]);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  if (!hydrated) return null;
 
   return (
     <>

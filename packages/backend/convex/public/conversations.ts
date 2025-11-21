@@ -1,12 +1,13 @@
 import { mutation, query } from "../_generated/server";
 import { v, ConvexError } from "convex/values";
+import { supportAgent } from "../system/ai/agents/supportAgent";
 
 async function validateContactSession(ctx: any, contactSessionId: string) {
   const sessions = await ctx.db.get(contactSessionId);
 
   if (!sessions || sessions.expiresAt < Date.now()) {
     throw new ConvexError({
-      code: "UNDEFINED",
+      code: "NOT_FOUND",
       message: "Contact session is invalid or expired",
     });
   }
@@ -26,8 +27,15 @@ export const getOne = query({
 
     if (!conversation) {
       throw new ConvexError({
-        code: "UNDEFINED",
+        code: "NOT_FOUND",
         message: "Conversation not found",
+      });
+    }
+
+    if (conversation.contactSessionId !== args.contactSessionId) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "Conversation does not belong to the contact session",
       });
     }
 
@@ -47,7 +55,9 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const sessions = await validateContactSession(ctx, args.contactSessionId);
 
-    const threadId = "123";
+    const { threadId } = await supportAgent.createThread(ctx, {
+      userId: args.organizationId,
+    });
 
     const conversationId = await ctx.db.insert("conversations", {
       contactSessionId: sessions._id,
