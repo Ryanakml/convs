@@ -7,7 +7,7 @@ async function validateContactSession(ctx: any, contactSessionId: string) {
 
   if (!sessions || sessions.expiresAt < Date.now()) {
     throw new ConvexError({
-      code: "NOT_FOUND",
+      code: "UNDEFINED",
       message: "Contact session is invalid or expired",
     });
   }
@@ -27,14 +27,14 @@ export const getOne = query({
 
     if (!conversation) {
       throw new ConvexError({
-        code: "NOT_FOUND",
+        code: "UNDEFINED",
         message: "Conversation not found",
       });
     }
 
     if (conversation.contactSessionId !== args.contactSessionId) {
       throw new ConvexError({
-        code: "UNAUTHORIZED",
+        code: "UNDEFINED",
         message: "Conversation does not belong to the contact session",
       });
     }
@@ -58,6 +58,8 @@ export const create = mutation({
     const { threadId } = await supportAgent.createThread(ctx, {
       userId: args.organizationId,
     });
+
+    console.log("threadId from supportAgent:", threadId);
 
     const conversationId = await ctx.db.insert("conversations", {
       contactSessionId: sessions._id,
