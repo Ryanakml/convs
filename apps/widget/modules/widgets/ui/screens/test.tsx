@@ -86,7 +86,7 @@ export const WidgetChatScreen = () => {
 
   // Sending message handler
   // 1. Create send handler
-  const handleSend = async (e: React.FormEvent | React.KeyboardEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault(); // prevent reload form submit behavior
 
     // validate all message conditions before sending
@@ -126,27 +126,24 @@ export const WidgetChatScreen = () => {
       setIsSending(false); // set sending state to false when done or stop the spinner
       textareaRef.current?.focus(); // refocus textarea after sending, so user can type again
     }
-  };
 
-  // handle enter key to send message
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // enter not create new line
-      handleSend(e); // call send handler
-    }
+    // handle enter key to send message
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault(); // enter not create new line
+        handleSend(e); // call send handler
+      }
+    };
   };
 
   // handler who send message when button clicked
   function getRole(msg: any) {
-    const messageRole = msg?.message?.role ?? msg?.role;
-
-    // Strategy 1: Check explicit role labels from backend
-    if (messageRole === "user") return "user";
+    // Strategy 1: Check explicit role labels
+    if (msg.role === "user") return "user";
     if (
-      messageRole === "assistant" ||
-      messageRole === "bot" ||
-      messageRole === "system" ||
-      messageRole === "tool"
+      msg.role === "assistant" ||
+      msg.role === "bot" ||
+      msg.role === "system"
     ) {
       return "assistant";
     }
@@ -155,13 +152,6 @@ export const WidgetChatScreen = () => {
     // Convert both to strings to ensure comparison works
     if (contactSessionId && msg.contactSessionId) {
       if (String(msg.contactSessionId) === String(contactSessionId)) {
-        return "user";
-      }
-    }
-
-    // Strategy 2b: Convex messages carry userId; match it to the session
-    if (contactSessionId && msg.userId) {
-      if (String(msg.userId) === String(contactSessionId)) {
         return "user";
       }
     }
@@ -249,7 +239,6 @@ export const WidgetChatScreen = () => {
             console.log("MSG DEBUG:", {
               text: msg.text || msg.content,
               role: msg.role,
-              messageRole: msg.message?.role,
               msgContactSessionId: msg.contactSessionId,
               myContactSessionId: contactSessionId,
               userId: msg.userId,
@@ -257,11 +246,7 @@ export const WidgetChatScreen = () => {
             // Determine role, the main function to know if the message is from user or bot
             const role = getRole(msg);
             // Clear "(no content)" so we can filter
-            const rawText =
-              msg.text ??
-              (typeof msg.message?.content === "string"
-                ? msg.message.content
-                : msg.content);
+            const rawText = msg.text ?? msg.content;
 
             // SKIP rendering if text is empty/null.
             // This will remove empty bubble glitch when bot is about to answer.
@@ -295,7 +280,7 @@ export const WidgetChatScreen = () => {
                       : "bg-muted/80 text-foreground rounded-bl-md"
                   )}
                 >
-                  {rawText}
+                  {rawText} // Render the actual message text
                 </div>
 
                 {/* Avatar User */}
@@ -307,7 +292,7 @@ export const WidgetChatScreen = () => {
               </div>
             );
           })}
-          {/* Sending Indicator for bot (....) */}
+          // Sending Indicator for bot (....)
           {isSending && (
             <div className="flex w-full gap-3 justify-start">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
@@ -331,22 +316,21 @@ export const WidgetChatScreen = () => {
               </div>
             </div>
           )}
-          {/* call useRef function to automatically scroll to bottom after message generated */}
-          <div ref={endRef} />
+          <div ref={endRef} /> // call useRef function to automatically scroll
+          to bottom after new message generated
         </div>
       </div>
 
       {/* 3. Input Area */}
-      <div className="border-t bg-background">
-        {/* Inner container */}
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          {/* Form to handle submit */}
+      <div className="bordet-t bg-background">
+        // Inner container
+        <div className="max-3-xl mx-ato px-4 py-4">
+          // Form to handle submit
           <form className="flex items-end gap-2" onSubmit={handleSend}>
-            {/* wrap textarea input */}
+            // wrap textarea input
             <div className="flex-1 relative">
               <Textarea
                 ref={textareaRef} // auto focus again after sending
-                onKeyDown={handleKeyDown}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)} // update message state on change
                 placeholder="Type your message..." // input placeholder
@@ -355,14 +339,14 @@ export const WidgetChatScreen = () => {
                 rows={1}
               />
             </div>
-            {/* Send button */}
+            // Send button
             <Button
               type="submit" // trigger onSubmit=handleSend after clicked
               size="icon" // icon size button
               disabled={!message.trim() || !threadId || isResolved || isSending} // disable button if message is empty or conversation is resolved or message is sending or threadId not ready
               className="h-[52px] w-[52px] rounded-xl flex-shrink-0"
             >
-              {/* if sending then load the loader icon else show send icon */}
+              // if sending then load the loader icon else show send icon
               {isSending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
@@ -370,7 +354,7 @@ export const WidgetChatScreen = () => {
               )}
             </Button>
           </form>
-          {/* Resolved Notice */}
+          // Resolved Notice
           <div>
             {isResolved && (
               <p className="text-xs text-muted-foreground text-center mt-2">
