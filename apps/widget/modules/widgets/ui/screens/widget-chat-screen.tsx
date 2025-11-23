@@ -15,7 +15,10 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeftIcon, Loader2, Menu, SendHorizontal } from "lucide-react";
 import { WidgetHeader } from "../components/widget-header";
-import { getByThreadId } from "@workspace/backend/system/conversations";
+
+import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
+import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
+import { AvatarWithBadge } from "@workspace/ui/components/dicebear-avatar";
 
 export const WidgetChatScreen = () => {
   // Read global state with jotai atoms useAtomValue and useSetAtom to change value temporarily
@@ -51,9 +54,14 @@ export const WidgetChatScreen = () => {
   // get threadId and isResolved from conversation
   const threadId = conversation?.threadId;
   const isResolved = conversation?.status === "resolved";
+  const botSeed = threadId || conversation?._id || "support-bot";
 
   // 3. fetch messages with usePaginationQuery for chunked loading just if we have threadId and contactSessionId ready and setted
-  const { results: messages, status } = usePaginatedQuery(
+  const {
+    results: messages,
+    status,
+    loadMore,
+  } = usePaginatedQuery(
     api.public.message.getMany,
     threadId && contactSessionId ? { threadId, contactSessionId } : "skip",
     { initialNumItems: 20 }
@@ -66,11 +74,30 @@ export const WidgetChatScreen = () => {
     (a, b) => a._creationTime - b._creationTime
   );
 
+  // Initialize infinite scroll hook
+  const {
+    topElementRef,
+    handleLoadMore,
+    isLoadingMore,
+    canLoadMore,
+    isLoadingFirstPage,
+  } = useInfiniteScroll({
+    status,
+    loadMore,
+    loadSize: 20,
+    observerEnabled: !isResolved,
+  });
+
   // Side Effect with use Effect, auto focus and autoscroll
   // 1. auto scroll to button when new message arrives
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [sorted]); // run this effect when sorted messages change
+    // Only scroll to bottom if we are NOT loading more (historical messages)
+    // and if it's a new message or initial load.
+    // Simple heuristic: if we are loading more, don't scroll to bottom.
+    if (!isLoadingMore && !isLoadingFirstPage) {
+      endRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [sorted.length, isLoadingMore, isLoadingFirstPage]); // run this effect when sorted messages change
 
   // 2. Auto focus textarea when screen load
   useEffect(() => {
@@ -207,7 +234,7 @@ export const WidgetChatScreen = () => {
   // Main Chat UI
   return (
     // 1. Main container structure
-    <div className="flex flex-col h-full">
+    <div className="max-w-2xl mx-auto p-4 h-screen flex flex-col">
       {/* 2. Header with back button and title */}
       <WidgetHeader className="flex items-center justify-between border-b">
         <div className="flex items-center gap-x-2">
@@ -227,8 +254,20 @@ export const WidgetChatScreen = () => {
       </WidgetHeader>
 
       {/* 2. Messages Container */}
-      <div className="flex overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 p-4 mb-4 overflow-y-auto bg-gray-50">
+          {/* Infinite Scroll Trigger */}
+          {!isLoadingFirstPage && sorted.length > 0 && (
+            <InfiniteScrollTrigger
+              ref={topElementRef}
+              canLoadMore={canLoadMore}
+              isLoadingMore={isLoadingMore}
+              onLoadMore={handleLoadMore}
+              loadMoreText="Load previous messages"
+              noMoreText="No more messages"
+            />
+          )}
+
           {/* Empty State if no conversation yet */}
           {sorted.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
@@ -281,8 +320,13 @@ export const WidgetChatScreen = () => {
               >
                 {/* Avatar Bot */}
                 {!isUser && (
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-sm">🤖</span>
+                  <div className="flex-shrink-0 mt-1">
+                    <AvatarWithBadge
+                      seed={botSeed}
+                      size={36}
+                      badgeImageUrl="/logo.png"
+                      badgeClassName="border-background"
+                    />
                   </div>
                 )}
 
@@ -311,7 +355,12 @@ export const WidgetChatScreen = () => {
           {isSending && (
             <div className="flex w-full gap-3 justify-start">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                <span className="text-sm">🤖</span>
+                <AvatarWithBadge
+                  seed={botSeed}
+                  size={36}
+                  badgeImageUrl="/logo.png"
+                  badgeClassName="border-background"
+                />
               </div>
               <div className="max-w-[75%] px-4 py-2.5 rounded-2xl rounded-bl-md text-sm bg-muted/80">
                 <div className="flex items-center gap-1">
