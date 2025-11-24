@@ -27,13 +27,8 @@ export const WidgetView = ({ organizationId }: Props) => {
   };
 
   return (
-    <main className="flex flex-col flex-1 gap-4 px-4 py-6">
+    <main className="flex h-full min-h-0 w-full flex-col flex-1 bg-background">
       {screenComponents[screen]}
-      {/* <div className="flex-1 rounded-2xl border bg-card p-4">
-        Widget View: {organizationId}
-      </div> */}
-
-      {/* <WidgetFooter /> */}
     </main>
   );
 };

@@ -11,7 +11,7 @@ const Page = ({ searchParams }: Props) => {
   const { organizationId } = use(searchParams);
 
   return (
-    <div className="bg-background min-h-screen flex flex-col">
+    <div className="bg-background h-screen flex flex-col overflow-hidden">
       <WidgetView organizationId={organizationId} />
     </div>
   );
