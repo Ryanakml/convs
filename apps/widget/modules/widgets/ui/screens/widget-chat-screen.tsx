@@ -108,7 +108,7 @@ export const WidgetChatScreen = () => {
   // 1. handle back to conversation list
   const onBack = () => {
     setConversationId(null);
-    setScreen("selection");
+    setScreen("inbox");
   }; // if this function called, it will set conversationId to null and set screen to selection
 
   // Sending message handler
@@ -205,10 +205,12 @@ export const WidgetChatScreen = () => {
   // Show loading skeleton
   // we have conversationId. we know which conversation to load, but we dont have conversation data yet. so
   // we show spinning loader to indicate loading state
-  if (conversationId && !conversation) {
+  const isFirstPageLoading = status === "LoadingFirstPage";
+
+  if (conversationId && (!conversation || isFirstPageLoading)) {
     return (
-      <div className="flex flex-col h-full">
-        <WidgetHeader className="flex items-center justify-between">
+      <div className="max-w-2xl w-full mx-auto p-4 h-screen flex flex-col">
+        <WidgetHeader className="flex items-center justify-between border-b">
           <div className="flex items-center gap-x-2">
             <Button size="icon" variant="ghost" onClick={onBack}>
               <ArrowLeftIcon className="h-4 w-4" />
@@ -234,7 +236,7 @@ export const WidgetChatScreen = () => {
   // Main Chat UI
   return (
     // 1. Main container structure
-    <div className="max-w-2xl mx-auto p-4 h-screen flex flex-col">
+    <div className="max-w-2xl w-full mx-auto p-4 h-screen flex flex-col">
       {/* 2. Header with back button and title */}
       <WidgetHeader className="flex items-center justify-between border-b">
         <div className="flex items-center gap-x-2">
