@@ -16,6 +16,7 @@ import { usePaginatedQuery } from "convex/react";
 import { api } from "@workspace/backend/_generated/api";
 import { formatDistanceToNow } from "date-fns";
 import { ConversationStatusIcon } from "@workspace/ui/components/conversation-status-icon";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export const WidgetInboxScreen = () => {
   const setScreen = useSetAtom(screenAtom);
@@ -55,19 +56,29 @@ export const WidgetInboxScreen = () => {
         </WidgetHeader>
 
         <div className="flex flex-1 flex-col gap-y-4 p-4 overflow-y-auto">
-          {/* {conversations?.status === "LoadingFirstPage" && (
-            <div className="flex flex-col gap-y-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="w-full h-16 rounded-xl bg-accent-foreground animate-pulse"
-                />
-              ))}
-            </div>
-          )} */}
           {conversations?.status === "LoadingFirstPage" && (
-            <div className="flex w-full justify-center py-6">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
+              <div className="relative flex flex-col w-full p-2 min-w-0">
+                <div className="w-full space-y-2">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 rounded-lg p-4"
+                    >
+                      <Skeleton className="w-10 h-10 shrink-0 rounded-full" />
+                      <div className="min-w-10 flex-1">
+                        <div className="flex w-full items-center gap-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="ml-auto h-3 w-12 shrink-0" />
+                        </div>
+                        <div className="mt-2">
+                          <Skeleton className="h-3 w-full" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
           {conversations?.results.length > 0 &&
