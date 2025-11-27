@@ -9,29 +9,25 @@ const statusConfig = {
   resolved: {
     icon: CheckIcon,
     color: "text-green-500",
-    label: "Resolved",
   },
   escalated: {
     icon: ArrowUpIcon,
     color: "text-yellow-500",
-    label: "Escalated",
   },
   unresolved: {
     icon: ArrowRightIcon,
-    color: "text-blue-500",
-    label: "Unresolved",
+    color: "text-red-500",
   },
 } as const;
 
 export const ConversationStatusIcon = ({
   status,
 }: ConversationStatusIconProps) => {
-  const { icon: Icon, color, label } = statusConfig[status];
+  const { icon: Icon, color } = statusConfig[status];
 
   return (
     <div className="flex items-center gap-x-1">
-      <Icon className={cn("size-4", color)} aria-label={label} />
-      <span className="text-sm font-medium">{label}</span>
+      <Icon className={cn("size-4", color)} />
     </div>
   );
 };
