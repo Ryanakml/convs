@@ -15,6 +15,7 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeftIcon, Loader2, Menu, SendHorizontal } from "lucide-react";
 import { WidgetHeader } from "../components/widget-header";
+import { format } from "date-fns/format";
 
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
@@ -51,9 +52,11 @@ export const WidgetChatScreen = () => {
       : "skip"
   );
 
-  // get threadId and isResolved from conversation
+  // get threadId and statuses from conversation
   const threadId = conversation?.threadId;
   const isResolved = conversation?.status === "resolved";
+  const isEscalated = conversation?.status === "escalated";
+  const canSend = !isResolved && !isEscalated;
   const botSeed = threadId || conversation?._id || "support-bot";
 
   // 3. fetch messages with usePaginationQuery for chunked loading just if we have threadId and contactSessionId ready and setted
@@ -85,7 +88,7 @@ export const WidgetChatScreen = () => {
     status,
     loadMore,
     loadSize: 20,
-    observerEnabled: !isResolved,
+    observerEnabled: !isResolved && !isEscalated,
   });
 
   // Side Effect with use Effect, auto focus and autoscroll
@@ -126,8 +129,9 @@ export const WidgetChatScreen = () => {
       !contactSessionId ||
       // if previous message is still sending
       isSending ||
-      // if conversation is resolved
-      isResolved
+      // if conversation is resolved or escalated
+      isResolved ||
+      isEscalated
     )
       // then just stop the function here
       return;
@@ -245,8 +249,10 @@ export const WidgetChatScreen = () => {
           </Button>
           <div>
             <p className="font-medium">Chat</p>
-            {isResolved && (
-              <p className="text-xs text-muted-foreground">Resolved</p>
+            {(isResolved || isEscalated) && (
+              <p className="text-xs text-muted-foreground">
+                {isResolved ? "Resolved" : "Escalated"}
+              </p>
             )}
           </div>
         </div>
@@ -316,13 +322,13 @@ export const WidgetChatScreen = () => {
               <div
                 key={msg._id}
                 className={cn(
-                  "flex w-full gap-3",
+                  "flex w-full gap-3 mb-4 items-start",
                   isUser ? "justify-end" : "justify-start" // This logic is for left-right alignment
                 )}
               >
                 {/* Avatar Bot */}
                 {!isUser && (
-                  <div className="flex-shrink-0 mt-1">
+                  <div className="flex-shrink-0">
                     <AvatarWithBadge
                       seed={botSeed}
                       size={36}
@@ -333,20 +339,30 @@ export const WidgetChatScreen = () => {
                 )}
 
                 {/* Bubble Area */}
-                <div
-                  className={cn(
-                    "max-w-[75%] px-4 py-2.5 rounded-2xl text-sm shadow-sm whitespace-pre-wrap break-words",
-                    isUser
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "bg-muted/80 text-foreground rounded-bl-md"
-                  )}
-                >
-                  {rawText}
+                <div className="max-w-[75%] space-y-1">
+                  <div
+                    className={cn(
+                      "px-4 py-2.5 rounded-2xl text-sm shadow-sm whitespace-pre-wrap break-words mt-1",
+                      isUser
+                        ? "bg-primary text-primary-foreground rounded-br-md"
+                        : "bg-muted/80 text-foreground rounded-bl-md"
+                    )}
+                  >
+                    {rawText}
+                  </div>
+                  <p
+                    className={cn(
+                      "text-[11px] text-muted-foreground",
+                      isUser && "text-right"
+                    )}
+                  >
+                    {format(new Date(msg._creationTime), "HH:mm")}
+                  </p>
                 </div>
 
                 {/* Avatar User */}
                 {isUser && (
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                     <span className="text-sm text-primary-foreground">👤</span>
                   </div>
                 )}
@@ -400,8 +416,14 @@ export const WidgetChatScreen = () => {
                 onKeyDown={handleKeyDown}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)} // update message state on change
-                placeholder="Type your message..." // input placeholder
-                disabled={isResolved || isSending} // disable input if conversation is resolved
+                placeholder={
+                  isEscalated
+                    ? "This conversation was escalated. Please wait for an operator."
+                    : isResolved
+                      ? "This conversation is resolved."
+                      : "Type your message..."
+                } // input placeholder
+                disabled={!canSend || isSending} // disable input if conversation is resolved or escalated
                 className="min-h-[52px] max-h-[200px] resize-none pr-12 rounded-xl"
                 rows={1}
               />
@@ -410,7 +432,7 @@ export const WidgetChatScreen = () => {
             <Button
               type="submit" // trigger onSubmit=handleSend after clicked
               size="icon" // icon size button
-              disabled={!message.trim() || !threadId || isResolved || isSending} // disable button if message is empty or conversation is resolved or message is sending or threadId not ready
+              disabled={!message.trim() || !threadId || !canSend || isSending} // disable button if message is empty or conversation is resolved/escalated or message is sending or threadId not ready
               className="h-[52px] w-[52px] rounded-xl flex-shrink-0"
             >
               {/* if sending then load the loader icon else show send icon */}
@@ -423,10 +445,11 @@ export const WidgetChatScreen = () => {
           </form>
           {/* Resolved Notice */}
           <div>
-            {isResolved && (
+            {(isResolved || isEscalated) && (
               <p className="text-xs text-muted-foreground text-center mt-2">
-                This conversation has been resolved. You can no longer send
-                messages.
+                {isResolved
+                  ? "This conversation has been resolved. You can no longer send messages."
+                  : "This conversation has been escalated. Please wait for an operator to respond."}
               </p>
             )}
           </div>
