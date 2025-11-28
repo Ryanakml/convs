@@ -14,6 +14,7 @@ import {
 } from "../../atoms/widget-atoms";
 import { useMutation } from "convex/react";
 import { api } from "@workspace/backend/_generated/api";
+import { WidgetFooter } from "../components/widget-footer";
 
 export const WidgetSelectionScreen = () => {
   const setConversationId = useSetAtom(conversationIdAtom);
@@ -79,6 +80,7 @@ export const WidgetSelectionScreen = () => {
           <ChevronRightIcon className="size-4" />
         </Button>
       </div>
+      <WidgetFooter />
     </>
   );
 };

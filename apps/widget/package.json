@@ -12,11 +12,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/react": "^1.1.12",
     "@clerk/nextjs": "^6.35.1",
+    "@convex-dev/agent": "^0.1.18",
     "@hookform/resolvers": "5.2.2",
     "@vapi-ai/web": "^2.5.1",
     "@workspace/ui": "workspace:*",
+    "ai": "^5.0.98",
     "convex": "^1.29.1",
+    "convex-helpers": "^0.1.105",
+    "date-fns": "^4.1.0",
     "jotai": "^2.15.1",
     "lucide-react": "^0.475.0",
     "next": "^15.4.5",
@@ -25,6 +30,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "7.66.1",
     "resolvers@5.2.2": "link:hookform/resolvers@5.2.2",
+    "streamdown": "^1.6.1",
     "zod": "3.25.76"
   },
   "devDependencies": {

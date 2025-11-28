@@ -1,13 +1,16 @@
 {
   "name": "@workspace/backend",
   "type": "module",
+  "files": [
+    "convex"
+  ],
   "scripts": {
     "dev": "convex dev",
     "setup": "convex dev --until-success"
   },
   "exports": {
-    "./convex/*": "./convex/*",
-    "./_generated/*": "./convex/_generated/*"
+    "./convex/_generated/api": "./convex/_generated/api.js",
+    "./convex/server": "./convex/server.js"
   },
   "devDependencies": {
     "@types/node": "^20.19.9",
@@ -15,7 +18,11 @@
     "typescript": "latest"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^2.0.31",
+    "@ai-sdk/openai": "^2.0.71",
     "@clerk/backend": "^2.23.0",
+    "@convex-dev/agent": "^0.3.0",
+    "ai": "^5.0.98",
     "convex": "^1.29.1"
   }
 }
