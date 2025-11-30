@@ -56,7 +56,7 @@ export const WidgetChatScreen = () => {
   const threadId = conversation?.threadId;
   const isResolved = conversation?.status === "resolved";
   const isEscalated = conversation?.status === "escalated";
-  const canSend = !isResolved && !isEscalated;
+  const canSend = !isResolved;
   const botSeed = threadId || conversation?._id || "support-bot";
 
   // 3. fetch messages with usePaginationQuery for chunked loading just if we have threadId and contactSessionId ready and setted
@@ -88,7 +88,7 @@ export const WidgetChatScreen = () => {
     status,
     loadMore,
     loadSize: 20,
-    observerEnabled: !isResolved && !isEscalated,
+    observerEnabled: !isResolved,
   });
 
   // Side Effect with use Effect, auto focus and autoscroll
@@ -129,9 +129,8 @@ export const WidgetChatScreen = () => {
       !contactSessionId ||
       // if previous message is still sending
       isSending ||
-      // if conversation is resolved or escalated
-      isResolved ||
-      isEscalated
+      // if conversation is resolved
+      isResolved
     )
       // then just stop the function here
       return;
@@ -418,12 +417,12 @@ export const WidgetChatScreen = () => {
                 onChange={(e) => setMessage(e.target.value)} // update message state on change
                 placeholder={
                   isEscalated
-                    ? "This conversation was escalated. Please wait for an operator."
+                    ? "Escalated to an operator. You can still send updates."
                     : isResolved
                       ? "This conversation is resolved."
                       : "Type your message..."
                 } // input placeholder
-                disabled={!canSend || isSending} // disable input if conversation is resolved or escalated
+                disabled={!canSend || isSending} // disable input if conversation is resolved
                 className="min-h-[52px] max-h-[200px] resize-none pr-12 rounded-xl"
                 rows={1}
               />
@@ -432,7 +431,7 @@ export const WidgetChatScreen = () => {
             <Button
               type="submit" // trigger onSubmit=handleSend after clicked
               size="icon" // icon size button
-              disabled={!message.trim() || !threadId || !canSend || isSending} // disable button if message is empty or conversation is resolved/escalated or message is sending or threadId not ready
+              disabled={!message.trim() || !threadId || !canSend || isSending} // disable button if message is empty or conversation is resolved or message is sending or threadId not ready
               className="h-[52px] w-[52px] rounded-xl flex-shrink-0"
             >
               {/* if sending then load the loader icon else show send icon */}
@@ -444,12 +443,12 @@ export const WidgetChatScreen = () => {
             </Button>
           </form>
           {/* Resolved Notice */}
-          <div>
+            <div>
             {(isResolved || isEscalated) && (
               <p className="text-xs text-muted-foreground text-center mt-2">
                 {isResolved
                   ? "This conversation has been resolved. You can no longer send messages."
-                  : "This conversation has been escalated. Please wait for an operator to respond."}
+                  : "This conversation has been escalated. A human operator will respond here; the bot has been disabled."}
               </p>
             )}
           </div>

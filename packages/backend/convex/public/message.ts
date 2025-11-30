@@ -3,6 +3,8 @@ import { action, query } from "../_generated/server";
 import { ConvexError, v } from "convex/values";
 import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
+import { resolveConversation } from "../system/ai/tools/resolveConversation";
+import { escalateConversation } from "../system/ai/tools/escalateConversation";
 
 export const create = action({
   args: {
@@ -42,13 +44,28 @@ export const create = action({
       });
     }
 
+    if (conversation.status === "escalated") {
+      await supportAgent.saveMessage(ctx, {
+        threadId: args.threadId,
+        userId: args.contactSessionId,
+        prompt: args.prompt,
+      });
+      return;
+    }
+
     await supportAgent.generateText(
       ctx,
       {
         threadId: args.threadId,
-        userId: args.contactSessionId, // tie messages to this contact session
+        userId: args.contactSessionId,
       },
-      { prompt: args.prompt }
+      {
+        prompt: args.prompt,
+        tools: {
+          resolveConversation,
+          escalateConversation,
+        },
+      }
     );
   },
 });
@@ -69,13 +86,10 @@ export const getMany = query({
       });
     }
 
-    const paginated = await supportAgent.listMessages(
-      ctx,
-      {
-        threadId: args.threadId,
-        paginationOpts: args.paginationOpts,
-      },
-    );
+    const paginated = await supportAgent.listMessages(ctx, {
+      threadId: args.threadId,
+      paginationOpts: args.paginationOpts,
+    });
 
     return paginated;
   },
