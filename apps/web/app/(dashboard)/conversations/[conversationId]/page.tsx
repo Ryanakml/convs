@@ -8,9 +8,11 @@ const page = async ({
 }) => {
   const { conversationId } = await params;
   return (
-    <ConversationIdView
-      conversationId={conversationId as Id<"conversations">}
-    />
+    <div className="h-screen overflow-hidden">
+      <ConversationIdView
+        conversationId={conversationId as Id<"conversations">}
+      />
+    </div>
   );
 };
 
