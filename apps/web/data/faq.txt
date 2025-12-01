@@ -1,0 +1,37 @@
+# Product Name
+Convs AI Support Agent
+
+# Overview
+Convs adalah platform AI Customer Support yang dapat digunakan untuk otomatisasi percakapan dengan pelanggan, menyediakan jawaban yang akurat berdasarkan dokumentasi, dan mendukung integrasi dengan website.
+
+# Features
+- Live chat widget
+- AI auto-response
+- Knowledge base uploading (PDF, TXT, DOCX)
+- Conversation status: unresolved, resolved, escalated
+- Admin dashboard
+
+# Pricing
+Starter: $9 / month
+Pro: $29 / month
+Business: $99 / month
+
+# Refund Policy
+Pengguna dapat mengajukan refund dalam waktu 7 hari setelah pembelian jika tidak puas.
+
+# How to Install
+1. Sign up di dashboard
+2. Tambahkan domain website
+3. Install widget script
+4. Upload file knowledge base (opsional)
+
+# Common Troubleshooting
+Q: Kenapa AI Agent tidak merespons?
+A: Pastikan API key aktif dan embedding knowledge base sudah selesai diproses.
+
+Q: Apakah agent bisa mendeteksi bahasa pengguna?
+A: Ya, sistem otomatis mendeteksi bahasa dan merespons sesuai bahasa pengguna.
+
+# Support
+Email: support@convs.com
+Response time: < 24 hours

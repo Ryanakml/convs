@@ -5,8 +5,10 @@ import { assert } from "convex-helpers";
 import { Id } from "../_generated/dataModel";
 
 const AI_MODELS = {
-  image: groq("llama-3.1-8b-instant"),
-  pdf: groq("llama-3.1-8b-instant"),
+  // Use a vision-capable model for binary/image inputs.
+  image: groq("llama-3.2-11b-vision-preview"),
+  pdf: groq("llama-3.2-11b-vision-preview"),
+  // Text-only model for HTML/plain text cleanup.
   html: groq("llama-3.1-8b-instant"),
 } as const;
 
@@ -44,88 +46,89 @@ export async function extractTextContent(
     return extractImageText(url);
   }
 
-  if (mimeType.toLowerCase().includes("pdf")){
-    return extractPdfText(url, mimeType, filename)
+  if (mimeType.toLowerCase().includes("pdf")) {
+    return extractPdfText(url, mimeType, filename);
   }
 
   if (mimeType.toLowerCase().includes("text")) {
-    return extractTextFileContent(ctx, storageId, bytes, mimeType)
+    return extractTextFileContent(ctx, storageId, bytes, mimeType);
   }
 
-  throw new Error(`unsupported MIME type: ${mimeType}`)
+  throw new Error(`unsupported MIME type: ${mimeType}`);
 }
 
 async function extractTextFileContent(
-    ctx: { 
-        storage: StorageActionWriter
-    },
-    storageId: Id<"_storage">,
-    bytes: ArrayBuffer | undefined,
-    mimeType: string
+  ctx: {
+    storage: StorageActionWriter;
+  },
+  storageId: Id<"_storage">,
+  bytes: ArrayBuffer | undefined,
+  mimeType: string
 ): Promise<string> {
-    const arrayBuffer = bytes || (await (await ctx.storage.get(storageId))?.arrayBuffer())
+  const arrayBuffer =
+    bytes || (await (await ctx.storage.get(storageId))?.arrayBuffer());
 
-    if (!arrayBuffer) {
-        throw new Error("failed to get file content")
-    }
+  if (!arrayBuffer) {
+    throw new Error("failed to get file content");
+  }
 
-    const text = new TextDecoder().decode(arrayBuffer)
+  const text = new TextDecoder().decode(arrayBuffer);
 
-    if (mimeType.toLowerCase() !== "text/plain") {
-        const result = await generateText({
-            model: AI_MODELS.html,
-            system: SYSTEM_PROMPT.html,
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "text",
-                            text,
-                        },
-                        {
-                            type: "text",
-                            text: "Extract the text and print it in markdown format without explaining that you'll do so."
-                        }
-                    ]
-                }
-            ]
-        })
+  if (mimeType.toLowerCase() !== "text/plain") {
+    const result = await generateText({
+      model: AI_MODELS.html,
+      system: SYSTEM_PROMPT.html,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text,
+            },
+            {
+              type: "text",
+              text: "Extract the text and print it in markdown format without explaining that you'll do so.",
+            },
+          ],
+        },
+      ],
+    });
 
-        return result.text
-    }
+    return result.text;
+  }
 
-    return text
+  return text;
 }
 
 async function extractPdfText(
-    url: string,
-    mimeType: string,
-    filename: string
+  url: string,
+  mimeType: string,
+  filename: string
 ): Promise<string> {
-    const result = await generateText({
-        model: AI_MODELS.pdf,
-        system: SYSTEM_PROMPT.pdf,
-        messages: [
-            {
-                role: "user",
-                content: [
-                    {
-                        type: "file",
-                        data: new URL(url),
-                        filename,
-                        mediaType: mimeType,
-                    },
-                    {
-                        type: "text",
-                        text: "Extract the text from the PDF and print it without explaining you'll do so.",
-                    }
-                ]
-            }
-        ]
-    })
+  const result = await generateText({
+    model: AI_MODELS.pdf,
+    system: SYSTEM_PROMPT.pdf,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "file",
+            data: new URL(url),
+            filename,
+            mediaType: mimeType,
+          },
+          {
+            type: "text",
+            text: "Extract the text from the PDF and print it without explaining you'll do so.",
+          },
+        ],
+      },
+    ],
+  });
 
-    return result.text
+  return result.text;
 }
 
 async function extractImageText(url: string): Promise<string> {
@@ -140,5 +143,5 @@ async function extractImageText(url: string): Promise<string> {
     ],
   });
 
-  return result.text
+  return result.text;
 }

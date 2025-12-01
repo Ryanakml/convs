@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.35.1",
+    "@dropzone-ui/react": "^7.0.4",
     "@hookform/resolvers": "5.2.2",
     "@sentry/nextjs": "^10",
     "@workspace/backend": "workspace:*",
