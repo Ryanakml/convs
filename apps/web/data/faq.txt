@@ -1,37 +1,39 @@
-# Product Name
-Convs AI Support Agent
+PRODUCT NAME: Convs AI Support Widget
 
-# Overview
-Convs adalah platform AI Customer Support yang dapat digunakan untuk otomatisasi percakapan dengan pelanggan, menyediakan jawaban yang akurat berdasarkan dokumentasi, dan mendukung integrasi dengan website.
+1. What is Convs?
+Convs is an AI-powered customer support widget designed to automatically answer customer questions, triage messages, and escalate to a human agent when needed.
 
-# Features
-- Live chat widget
-- AI auto-response
-- Knowledge base uploading (PDF, TXT, DOCX)
-- Conversation status: unresolved, resolved, escalated
-- Admin dashboard
+2. How does Convs work?
+Convs connects your website with an AI agent trained using your knowledge base. When a user asks a question, the system retrieves the most relevant information and generates a helpful response.
 
-# Pricing
-Starter: $9 / month
-Pro: $29 / month
-Business: $99 / month
+3. Does Convs support multiple organizations or teams?
+Yes. Convs is multi-tenant. Each organization can have its own knowledge base, settings, and agents.
 
-# Refund Policy
-Pengguna dapat mengajukan refund dalam waktu 7 hari setelah pembelian jika tidak puas.
+4. Does Convs support real-time messaging?
+Yes, the widget includes real-time messaging between customers, AI, and humans.
 
-# How to Install
-1. Sign up di dashboard
-2. Tambahkan domain website
-3. Install widget script
-4. Upload file knowledge base (opsional)
+5. Can I integrate Convs with Clerk authentication?
+Yes. Convs supports Clerk for managing user and organization authentication.
 
-# Common Troubleshooting
-Q: Kenapa AI Agent tidak merespons?
-A: Pastikan API key aktif dan embedding knowledge base sudah selesai diproses.
+6. Can the bot escalate to a human if it cannot answer?
+Yes. Convs includes automated escalation logic. If confidence is low or the user requests a human, the conversation status changes to “escalated”.
 
-Q: Apakah agent bisa mendeteksi bahasa pengguna?
-A: Ya, sistem otomatis mendeteksi bahasa dan merespons sesuai bahasa pengguna.
+7. What are conversation statuses and what do they mean?
+- Unresolved: The conversation is active and waiting for an answer.
+- Escalated: The bot forwarded the conversation to a human.
+- Resolved: The issue is completed and closed.
 
-# Support
-Email: support@convs.com
-Response time: < 24 hours
+8. Does Convs store customer chat history?
+Yes. All messages are saved for future reference and context continuity.
+
+9. Can I customize the bot responses or personality?
+Yes. The tone, language, and rules can be adjusted in settings.
+
+10. Does Convs require internet to work?
+Yes. Since it uses an online AI model and server infrastructure, an internet connection is required.
+
+11. What languages does Convs support?
+The system supports multilingual responses depending on the model capabilities. English and Indonesian are fully supported.
+
+12. Can I upload documents for training?
+Yes. You can upload FAQs, manuals, product guides, or markdown files as knowledge sources for retrieval.
