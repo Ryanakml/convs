@@ -9,9 +9,12 @@
  */
 
 import type * as lib_extractTextContent from "../lib/extractTextContent.js";
+import type * as lib_secrets from "../lib/secrets.js";
 import type * as private_conversations from "../private/conversations.js";
 import type * as private_file from "../private/file.js";
 import type * as private_message from "../private/message.js";
+import type * as private_plugins from "../private/plugins.js";
+import type * as private_secrets from "../private/secrets.js";
 import type * as public_contactSession from "../public/contactSession.js";
 import type * as public_conversations from "../public/conversations.js";
 import type * as public_message from "../public/message.js";
@@ -24,6 +27,8 @@ import type * as system_ai_tools_resolveConversation from "../system/ai/tools/re
 import type * as system_ai_tools_search from "../system/ai/tools/search.js";
 import type * as system_contactSession from "../system/contactSession.js";
 import type * as system_conversations from "../system/conversations.js";
+import type * as system_plugins from "../system/plugins.js";
+import type * as system_secrets from "../system/secrets.js";
 import type * as users from "../users.js";
 
 import type {
@@ -34,9 +39,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "lib/extractTextContent": typeof lib_extractTextContent;
+  "lib/secrets": typeof lib_secrets;
   "private/conversations": typeof private_conversations;
   "private/file": typeof private_file;
   "private/message": typeof private_message;
+  "private/plugins": typeof private_plugins;
+  "private/secrets": typeof private_secrets;
   "public/contactSession": typeof public_contactSession;
   "public/conversations": typeof public_conversations;
   "public/message": typeof public_message;
@@ -49,6 +57,8 @@ declare const fullApi: ApiFromModules<{
   "system/ai/tools/search": typeof system_ai_tools_search;
   "system/contactSession": typeof system_contactSession;
   "system/conversations": typeof system_conversations;
+  "system/plugins": typeof system_plugins;
+  "system/secrets": typeof system_secrets;
   users: typeof users;
 }>;
 
