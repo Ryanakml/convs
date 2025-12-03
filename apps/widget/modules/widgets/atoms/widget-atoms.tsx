@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { atomFamily, atomWithStorage } from "jotai/utils";
 import { WidgetScreen } from "../types";
-import { Id } from "@workspace/backend/_generated/dataModel";
+import { Doc, Id } from "@workspace/backend/_generated/dataModel";
 
 // Basic widget state atom
 export const screenAtom = atom<WidgetScreen>("loading");
@@ -20,3 +20,11 @@ export const contactSessionIdFamily = atomFamily((organizationIdAtom: string) =>
 );
 
 export const conversationIdAtom = atom<Id<"conversations"> | null>(null);
+
+export const widgetSettingsAtom = atom<Doc<"widgetSettings"> | null>(null);
+
+export const vapiSecretsAtom = atom<{
+    publicApiKey: string;
+} | null>(null);
+
+export const hasVapiSecretsAtom = atom((get) => get(vapiSecretsAtom) !== null);
