@@ -32,6 +32,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
+import { VapiConnectedView } from "../components/vapi-connected-view";
 
 const vapiFeatures: FeatureCardProps[] = [
   {
@@ -61,14 +62,55 @@ const formSchema = z.object({
   privateApiKey: z.string().min(1, "Private API Key is required"),
 });
 
-const VapiPluginForm = ({
+const VapiDisconnectDialog = ({
   open,
   setOpen,
 }: {
   open: boolean;
   setOpen: (value: boolean) => void;
 }) => {
-  const upsertSecretValue = useMutation(api.private.secrets.upsert);
+  const removePlugin = useMutation(api.private.plugins.remove);
+
+  const onSubmit = async () => {
+    try {
+      await removePlugin({
+        service: "vapi",
+      });
+      setOpen(false);
+      toast.success("Vapi plugin removed successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to remove Vapi plugin. Please try again.");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Disconnect Vapi Plugin</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Are you sure you want to disconnect the Vapi plugin?
+        </DialogDescription>
+        <DialogFooter>
+          <Button variant="outline" onClick={onSubmit}>
+            Disconnect
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const VapiConnectForm = ({
+  open,
+  setOpen,
+}: {
+  open: boolean;
+  setOpen: (value: boolean) => void;
+}) => {
+  const removePlugins = useMutation(api.private.secrets.upsert);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -80,7 +122,7 @@ const VapiPluginForm = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await upsertSecretValue({
+      await removePlugins({
         service: "vapi",
         value: {
           publicApiKey: values.publicApiKey,
@@ -136,7 +178,7 @@ const VapiPluginForm = ({
                     <Input
                       {...field}
                       placeholder="Enter your Vapi Private API Key"
-                      type="text"
+                      type="password"
                     />
                   </FormControl>
                   <FormMessage />
@@ -161,7 +203,7 @@ export const VapiView = () => {
   const [connectOpen, setConnectOpen] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
 
-  const handlesubmit = () => {
+  const toggleConnection = () => {
     if (vapiPlugin) {
       setRemoveOpen(true);
     } else {
@@ -171,7 +213,8 @@ export const VapiView = () => {
 
   return (
     <>
-      <VapiPluginForm open={connectOpen} setOpen={setConnectOpen} />
+      <VapiConnectForm open={connectOpen} setOpen={setConnectOpen} />
+      <VapiDisconnectDialog open={removeOpen} setOpen={setRemoveOpen} />
       <div className="flex flex-col bg-muted p-8 min-h-screen">
         <div className="mx-auto max-w-screen-md w-full">
           <div className="space-y-2">
@@ -183,14 +226,14 @@ export const VapiView = () => {
           </div>
           <div className="mt-8">
             {vapiPlugin ? (
-              <div>Vapi Plugin is connected.</div>
+              <VapiConnectedView onDisconnect={toggleConnection} />
             ) : (
               <PluginCard
                 serviceImage="/logo.png"
                 serviceName="vapi"
                 features={vapiFeatures}
                 isDisabled={vapiPlugin === undefined}
-                onSubmit={handlesubmit}
+                onSubmit={toggleConnection}
               />
             )}
           </div>
