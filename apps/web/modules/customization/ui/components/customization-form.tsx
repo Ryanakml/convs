@@ -75,7 +75,7 @@ export const CustomizationForm = ({
       await upsertWidgetSettings({
         greetMessage: values.greetMessage,
         defaultSuggestion: values.defaultSuggestion,
-        vapiSettings: values.vapiSettings,
+        vapiSettings,
       });
 
       toast.success("Widget settings saved!");

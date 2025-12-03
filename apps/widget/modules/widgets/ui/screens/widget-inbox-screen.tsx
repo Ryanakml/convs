@@ -1,10 +1,9 @@
 "use client";
 
 import { useAtomValue, useSetAtom } from "jotai";
-import { AlertTriangleIcon, ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import {
   contactSessionIdFamily,
-  errorMessageAtom,
   organizationIdAtom,
   screenAtom,
   conversationIdAtom,
