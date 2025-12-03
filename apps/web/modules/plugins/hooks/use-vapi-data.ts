@@ -28,21 +28,35 @@ export const useVapiAssistant = (): UseVapiAssistantsResult => {
   const getAssistants = useAction(api.private.vapi.getAssistants);
 
   useEffect(() => {
+    let cencelled = false;
+
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const result = await getAssistants();
+        if (cencelled) {
+          return;
+        }
         setData(result);
         setError(null);
       } catch (err) {
+        if (cencelled) {
+          return;
+        }
         setError(err as Error);
         toast.error("Failed to fetch Vapi assistants.");
       } finally {
-        setIsLoading(false);
+        if (!cencelled) {
+          setIsLoading(false);
+        }
       }
     };
     fetchData();
-  }, [getAssistants]);
+
+    return () => {
+      cencelled = true;
+    };
+  }, []);
 
   return { data, isLoading, error };
 };
@@ -55,21 +69,34 @@ export const useVapiPhoneNumber = (): UseVapiPhoneNumberResult => {
   const getPhoneNumbers = useAction(api.private.vapi.getPhoneNumberVapiClient);
 
   useEffect(() => {
+    let cencelled = false;
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const result = await getPhoneNumbers();
+        if (cencelled) {
+          return;
+        }
         setData(result);
         setError(null);
       } catch (err) {
+        if (cencelled) {
+          return;
+        }
         setError(err as Error);
         toast.error("Failed to fetch Vapi phone numbers.");
       } finally {
-        setIsLoading(false);
+        if (!cencelled) {
+          setIsLoading(false);
+        }
       }
     };
     fetchData();
-  }, [getPhoneNumbers]);
+
+    return () => {
+      cencelled = true;
+    };
+  }, []);
 
   return { data, isLoading, error };
 };
