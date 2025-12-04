@@ -103,7 +103,7 @@ export const WidgetSelectionScreen = () => {
           </Button>
         )}
 
-        {/* Voice Chat */}
+        {/* Contact Us */}
         {hasVapiSecrets && widgetSettings?.vapiSettings?.phoneNumber && (
           <Button
             className="w-full h-16 justify-between rounded-xl bg-accent-foreground"
@@ -113,7 +113,7 @@ export const WidgetSelectionScreen = () => {
           >
             <div className="flex items-center gap-x-2">
               <PhoneIcon className="size-4" />
-              <span>Start Voice Call</span>
+              <span>Contact Us</span>
             </div>
             <ChevronRightIcon className="size-4" />
           </Button>

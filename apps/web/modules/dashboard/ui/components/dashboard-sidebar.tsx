@@ -25,6 +25,7 @@ import {
   SidebarRail,
 } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
+import { ThemeToggle } from "./theme-toggle";
 
 const customerSupportItems = [
   {
@@ -59,7 +60,7 @@ const configurationItems = [
 
 const accountItems = [
   {
-    title: "Billing",
+    title: "Plans and Billing",
     href: "/billing",
     icon: <CreditCardIcon size={16} />,
   },
@@ -96,9 +97,19 @@ export const DashboardSidebar = () => {
                 skipInvitationScreen
                 appearance={{
                   elements: {
-                    organizationSwitcherTrigger: `group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center`,
-                    organizationSwitcherAvatarBox: `group-data-[collapsible=icon]:size-6`,
-                    organizationSwitcherText: `group-data-[collapsible=icon]:hidden`,
+                    organizationSwitcherTrigger: `
+        group-data-[collapsible=icon]:px-0 
+        group-data-[collapsible=icon]:w-8 
+        group-data-[collapsible=icon]:justify-center
+      `,
+                    organizationSwitcherAvatarBox: `
+        group-data-[collapsible=icon]:size-6
+      `,
+                    organizationSwitcherText: `
+        group-data-[collapsible=icon]:hidden
+        text-black
+        dark:text-white
+      `,
                   },
                 }}
               />
@@ -106,7 +117,6 @@ export const DashboardSidebar = () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs font-semibold uppercase tracking-wider px-3 mb-2">
@@ -213,8 +223,10 @@ export const DashboardSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter className="border-t border-sidebar-border p-3">
+        <SidebarMenuItem>
+          <ThemeToggle />
+        </SidebarMenuItem>
         <SidebarMenuItem>
           <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
             <UserButton
@@ -231,7 +243,6 @@ export const DashboardSidebar = () => {
           </div>
         </SidebarMenuItem>
       </SidebarFooter>
-
       <SidebarRail />
     </Sidebar>
   );

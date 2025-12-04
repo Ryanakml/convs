@@ -1,11 +1,14 @@
-import React from "react";
+import { IntegrationsView } from "@/modules/integrations/ui/views/integrations-view";
+import { Protect } from "@clerk/nextjs";
+import { PremiumFeatureOverlay } from "@/modules/billing/ui/components/premium-feature-overlay";
 
 const IntegrationsPage = () => {
   return (
-    <div className="flex items-center justify-center min-h-svh">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Integrations</h1>
-      </div>
+    <div className="relative">
+      <Protect condition={(has) => !has({ plan: "pro" })} fallback={null}>
+        <PremiumFeatureOverlay />
+      </Protect>
+      <IntegrationsView />
     </div>
   );
 };
