@@ -38,7 +38,6 @@ export const refresh = internalMutation({
     }
 
     return contactSession;
-    3;
   },
 });
 
