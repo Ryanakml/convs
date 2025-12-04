@@ -1,5 +1,4 @@
-import { internalMutation, internalQuery, query } from "../_generated/server";
-import { ConvexError } from "convex/values";
+import { internalMutation, internalQuery } from "../_generated/server";
 import { v } from "convex/values";
 
 export const upsert = internalMutation({

@@ -42,6 +42,18 @@ export const enhanceResponse = action({
       });
     }
 
+    const subscription = await ctx.runQuery(
+      internal.system.subscriptions.getByOrganizationId,
+      { organizationId: identity.orgId }
+    );
+
+    if (!subscription || subscription.status !== "active") {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "Subscription required for this feature",
+      });
+    }
+
     const currentDraft = args.prompt.trim();
     if (!currentDraft) {
       throw new ConvexError({

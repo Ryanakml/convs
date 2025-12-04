@@ -5,8 +5,14 @@ import { httpRouter, HttpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 
-const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY || "",
+const clerkSecret = process.env.CLERK_SECRET_KEY;
+
+if (!clerkSecret) {
+  throw new Error("Missing CLERK_SECRET_KEY environment variable");
+}
+
+export const clerkClient = createClerkClient({
+  secretKey: clerkSecret,
   apiVersion: "v1",
 });
 
@@ -54,6 +60,12 @@ http.route({
 });
 
 async function validateRequest(req: Request): Promise<WebhookEvent | null> {
+  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    throw new Error("Missing CLERK_WEBHOOK_SECRET environment variable");
+  }
+
   const payloadString = await req.text();
 
   const svixHeaders = {
@@ -62,7 +74,7 @@ async function validateRequest(req: Request): Promise<WebhookEvent | null> {
     "svix-signature": req.headers.get("svix-signature") || "",
   };
 
-  const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET || "");
+  const wh = new Webhook(webhookSecret);
 
   try {
     return wh.verify(payloadString, svixHeaders) as unknown as WebhookEvent;
