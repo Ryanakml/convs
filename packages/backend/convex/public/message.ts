@@ -54,6 +54,23 @@ export const create = action({
       return;
     }
 
+    await ctx.runMutation(internal.system.contactSession.refresh, {
+      contactSessionId: args.contactSessionId,
+    });
+
+    // Subscription
+    const subscription = await ctx.runQuery(
+      internal.system.subscriptions.getByOrganizationId,
+      { organizationId: conversation.organizationId }
+    );
+
+    if (!subscription || subscription.status !== "active") {
+      await ctx.runMutation(internal.system.conversations.escalate, {
+        threadId: args.threadId,
+      });
+      return;
+    }
+
     await supportAgent.generateText(
       ctx,
       {
