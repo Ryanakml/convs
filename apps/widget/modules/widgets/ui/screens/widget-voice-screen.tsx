@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
-import Vapi from "@vapi-ai/web";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import {
   screenAtom,
-  vapiSecretsAtom,
-  widgetSettingsAtom,
 } from "../../atoms/widget-atoms";
 import { Button } from "@workspace/ui/components/button";
 import { ArrowLeft, MicIcon, MicOffIcon, PhoneIcon, PhoneOffIcon, XIcon } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useVapi } from "../../hooks/use-vapi";
 import { WidgetHeader } from "../components/widget-header";
-import { WidgetFooter } from "../components/widget-footer";
 
 export const WidgetVoiceScreen = () => {
   const setScreen = useSetAtom(screenAtom);

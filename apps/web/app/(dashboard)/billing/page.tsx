@@ -1,12 +1,7 @@
+import { BillingView } from "@/modules/billing/ui/views/billing-view";
 import React from "react";
 
 const BillingPage = () => {
-  return (
-    <div className="flex items-center justify-center min-h-svh">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Billing</h1>
-      </div>
-    </div>
-  );
+  return <BillingView />;
 };
 export default BillingPage;
