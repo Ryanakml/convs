@@ -23,7 +23,7 @@ export const INTEGRATIONS = [
 
 export type IntegrationId = (typeof INTEGRATIONS)[number]["id"];
 
-const WIDGET_SRC = "https://cdn.your-domain.com/widget.js";
+const WIDGET_SRC = "https://convs-widget.vercel.app/widget.js";
 
 export const HTML_SCRIPT = `<script src="${WIDGET_SRC}" data-organization-id="{{ORGANIZATION_ID}}" async></script>`;
 
