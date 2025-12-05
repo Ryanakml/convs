@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "vite --port 3002",
-    "build": "vite build"
+    "build": "vite build",
+    "postbuild": "cp dist/widget.js ../widget/public/widget.js"
   },
   "devDependencies": {
     "@types/node": "^20.19.9",

@@ -6,7 +6,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "embed.ts"),
       name: "ConvsWidget",
-      fileName: "widget",
+      fileName: () => "widget.js",
       formats: ["iife"],
     },
     rollupOptions: {
