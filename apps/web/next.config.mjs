@@ -3,12 +3,18 @@ const nextConfig = {
   transpilePackages: ["@workspace/ui"],
   experimental: {
     outputFileTracingExcludes: {
-      "*": ["**/*.map"],
+      "*": [
+        "**/node_modules/**/*.map",
+        "**/node_modules/**/*.d.ts",
+        "**/node_modules/**/*.json",
+      ],
     },
   },
-  onDemandEntries: {
-    maxInactiveAge: 60 * 60 * 1000,
-    pagesBufferLength: 5,
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.optimization.minimize = false;
+    }
+    return config;
   },
 };
 
