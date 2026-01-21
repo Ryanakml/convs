@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Search,
-  Bell,
-  User,
-  Menu,
-  MessageSquare,
-  X,
-  Minimize2,
-} from "lucide-react";
+import { Search, Bell, MessageSquare, X, Minimize2 } from "lucide-react";
 
 const EchoLandingPage = () => {
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
