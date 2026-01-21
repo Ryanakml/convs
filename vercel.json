@@ -1,5 +1,5 @@
 {
-  "buildCommand": "rm -rf apps/web/.next && turbo build --force --no-cache",
+  "buildCommand": "rm -rf apps/web/.next && turbo build",
   "env": {
     "TURBO_TELEMETRY_DISABLED": "1",
     "SKIP_BUILD_PRODUCT_OPTIMIZATION_TESTS": "1"
