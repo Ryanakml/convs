@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Search, Bell, MessageSquare, X, Minimize2 } from "lucide-react";
 
 const EchoLandingPage = () => {
-  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
-
   return (
     <div className="min-h-screen bg-[#0f1419] text-white font-sans overflow-hidden relative">
       {/* Background gradient effects */}
@@ -37,18 +35,10 @@ const EchoLandingPage = () => {
 
           {/* CTA Buttons */}
           <div className="flex gap-4 justify-center">
-            <button
-              onMouseEnter={() => setHoveredButton("demo")}
-              onMouseLeave={() => setHoveredButton(null)}
-              className="px-8 py-3.5 bg-cyan-400 text-gray-900 rounded-full font-medium hover:bg-cyan-300 transition-all duration-300 hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] hover:scale-105"
-            >
+            <button className="px-8 py-3.5 bg-cyan-400 text-gray-900 rounded-full font-medium hover:bg-cyan-300 transition-all duration-300 hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] hover:scale-105">
               Request a Demo
             </button>
-            <button
-              onMouseEnter={() => setHoveredButton("docs")}
-              onMouseLeave={() => setHoveredButton(null)}
-              className="px-8 py-3.5 border-2 border-cyan-400/50 text-cyan-400 rounded-full font-medium hover:bg-cyan-400/10 hover:border-cyan-400 transition-all duration-300"
-            >
+            <button className="px-8 py-3.5 border-2 border-cyan-400/50 text-cyan-400 rounded-full font-medium hover:bg-cyan-400/10 hover:border-cyan-400 transition-all duration-300">
               View Documentation
             </button>
           </div>
