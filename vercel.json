@@ -1,7 +1,8 @@
 {
-  "buildCommand": "rm -rf apps/web/.next && turbo build",
+  "buildCommand": "rm -rf apps/web/.next && rm -rf .turbo && turbo build",
   "env": {
     "TURBO_TELEMETRY_DISABLED": "1",
-    "SKIP_BUILD_PRODUCT_OPTIMIZATION_TESTS": "1"
+    "SKIP_BUILD_PRODUCT_OPTIMIZATION_TESTS": "1",
+    "NODE_OPTIONS": "--max-old-space-size=4096"
   }
 }
