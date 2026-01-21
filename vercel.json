@@ -1,0 +1,6 @@
+{
+  "buildCommand": "turbo build --force",
+  "env": {
+    "TURBO_TELEMETRY_DISABLED": "1"
+  }
+}
