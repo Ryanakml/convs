@@ -26,7 +26,7 @@ export async function searchKnowledgeBase(
     orgId: string;
     query: string;
     limit?: number;
-  }
+  },
 ): Promise<KnowledgeResult> {
   // 1. Ambil output dari rag.search
   const searchOutput = await rag.search(ctx, {
@@ -54,7 +54,7 @@ export async function searchKnowledgeBase(
   const best = searchResults[0];
 
   // 5. Cek similarity score
-  if (best.score < MIN_SIMILARITY) {
+  if (!best || best.score < MIN_SIMILARITY) {
     return {
       status: "NOT_FOUND",
       content: "",
