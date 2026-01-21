@@ -6,6 +6,8 @@ import { paginationOptsValidator } from "convex/server";
 import { saveMessage } from "@convex-dev/agent";
 import { generateText } from "ai";
 import { groq } from "@ai-sdk/groq";
+import { ENHANCE_RESPONSE_SYSTEM_PROMPT } from "../system/ai/prompts";
+import { USER_MESSAGE_METADATA } from "../lib/messageVisibility";
 
 export const enhanceResponse = action({
   args: {
@@ -66,10 +68,7 @@ export const enhanceResponse = action({
     // Kita kasih instruksi spesifik agar dia bertindak sebagai editor
     const { text } = await generateText({
       model: groq("llama-3.1-8b-instant"),
-      system: `You are an expert customer support editor. 
-      Your task is to rewrite the user's draft to be more empathetic, professional, and concise. 
-      Do NOT add new facts. Do NOT output conversational filler (like "Here is the rewrite:"). 
-      Just output the rewritten message directly.`,
+      system: ENHANCE_RESPONSE_SYSTEM_PROMPT,
       prompt: currentDraft,
     });
 

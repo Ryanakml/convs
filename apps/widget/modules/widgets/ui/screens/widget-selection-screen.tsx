@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRightIcon, MessageSquareIcon, MicIcon, PhoneIcon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  MessageSquareIcon,
+  MicIcon,
+  PhoneIcon,
+} from "lucide-react";
 import { WidgetHeader } from "../components/widget-header";
 import { Button } from "@workspace/ui/components/button";
 import { useSetAtom, useAtomValue } from "jotai";
@@ -28,7 +33,7 @@ export const WidgetSelectionScreen = () => {
 
   const organizationId = useAtomValue(organizationIdAtom);
   const contactSessionId = useAtomValue(
-    contactSessionIdFamily(organizationId || "")
+    contactSessionIdFamily(organizationId || ""),
   );
 
   const [isPending, setIsPending] = useState(false);
@@ -73,49 +78,61 @@ export const WidgetSelectionScreen = () => {
         </div>
       </WidgetHeader>
       <div className="flex flex-1 flex-col gap-y-4 p-4 overflow-y-auto">
-        {/* Chat */}
+        {/* Start a Chat */}
         <Button
-          className="w-full h-16 justify-between rounded-xl bg-accent-foreground"
-          variant={"outline"}
+          className="w-full h-16 justify-between rounded-xl bg-card hover:bg-accent px-4 border shadow-sm transition-all"
+          variant="outline"
           onClick={handleNewConversation}
           disabled={isPending}
         >
-          <div className="flex items-center gap-x-2">
-            <MessageSquareIcon className="size-4" />
-            <span>Start a chat</span>
+          <div className="flex items-center gap-x-3">
+            <div className="bg-primary/10 p-2 rounded-lg">
+              <MessageSquareIcon className="size-5 text-primary" />
+            </div>
+            <span className="font-medium text-sm text-foreground">
+              Start a chat
+            </span>
           </div>
-          <ChevronRightIcon className="size-4" />
+          <ChevronRightIcon className="size-4 text-muted-foreground" />
         </Button>
 
         {/* Voice Chat */}
         {hasVapiSecrets && widgetSettings?.vapiSettings?.assistantId && (
           <Button
-            className="w-full h-16 justify-between rounded-xl bg-accent-foreground"
-            variant={"outline"}
+            className="w-full h-16 justify-between rounded-xl bg-card hover:bg-accent px-4 border shadow-sm transition-all mt-2"
+            variant="outline"
             onClick={() => setScreen("voice")}
             disabled={isPending}
           >
-            <div className="flex items-center gap-x-2">
-              <MicIcon className="size-4" />
-              <span>Start Voice Call</span>
+            <div className="flex items-center gap-x-3">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <MicIcon className="size-5 text-primary" />
+              </div>
+              <span className="font-medium text-sm text-foreground">
+                Start Voice Call
+              </span>
             </div>
-            <ChevronRightIcon className="size-4" />
+            <ChevronRightIcon className="size-4 text-muted-foreground" />
           </Button>
         )}
 
         {/* Contact Us */}
         {hasVapiSecrets && widgetSettings?.vapiSettings?.phoneNumber && (
           <Button
-            className="w-full h-16 justify-between rounded-xl bg-accent-foreground"
-            variant={"outline"}
+            className="w-full h-16 justify-between rounded-xl bg-card hover:bg-accent px-4 border shadow-sm transition-all mt-2"
+            variant="outline"
             onClick={() => setScreen("contact")}
             disabled={isPending}
           >
-            <div className="flex items-center gap-x-2">
-              <PhoneIcon className="size-4" />
-              <span>Contact Us</span>
+            <div className="flex items-center gap-x-3">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <PhoneIcon className="size-5 text-primary" />
+              </div>
+              <span className="font-medium text-sm text-foreground">
+                Contact Us
+              </span>
             </div>
-            <ChevronRightIcon className="size-4" />
+            <ChevronRightIcon className="size-4 text-muted-foreground" />
           </Button>
         )}
       </div>

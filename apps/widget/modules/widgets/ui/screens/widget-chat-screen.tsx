@@ -21,6 +21,28 @@ import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
 import { AvatarWithBadge } from "@workspace/ui/components/dicebear-avatar";
 
+interface MessageData {
+  _id: string;
+  _creationTime: number;
+  threadId?: string;
+  contactSessionId?: string;
+  userId?: string;
+  tool?: boolean;
+  role?: string;
+  text?: string;
+  content?: string | Array<Record<string, unknown>>;
+  message?: {
+    role?: string;
+    content?: string | Array<Record<string, unknown>>;
+    providerOptions?: Record<string, Record<string, unknown>>;
+  };
+  providerOptions?: {
+    meta?: {
+      visibility?: "user" | "internal";
+    };
+  };
+}
+
 export const WidgetChatScreen = () => {
   // Read global state with jotai atoms useAtomValue and useSetAtom to change value temporarily
   const conversationId = useAtomValue(conversationIdAtom);
@@ -167,17 +189,12 @@ export const WidgetChatScreen = () => {
   };
 
   // handler who send message when button clicked
-  function getRole(msg: any) {
+  function getRole(msg: MessageData): "user" | "assistant" {
     const messageRole = msg?.message?.role ?? msg?.role;
 
     // Strategy 1: Check explicit role labels from backend
     if (messageRole === "user") return "user";
-    if (
-      messageRole === "assistant" ||
-      messageRole === "bot" ||
-      messageRole === "system" ||
-      messageRole === "tool"
-    ) {
+    if (messageRole === "assistant" || messageRole === "bot") {
       return "assistant";
     }
 
@@ -203,6 +220,43 @@ export const WidgetChatScreen = () => {
 
     // Default: Treat as bot message
     return "assistant";
+  }
+
+  function getVisibility(msg: MessageData): "user" | "internal" | undefined {
+    const visibility =
+      msg?.providerOptions?.meta?.visibility ??
+      (typeof msg?.message === "object"
+        ? msg.message?.providerOptions?.meta?.visibility
+        : undefined);
+
+    if (visibility === "user" || visibility === "internal") {
+      return visibility;
+    }
+    return undefined;
+  }
+
+  function getRawText(msg: MessageData): string | undefined {
+    const content =
+      msg.text ??
+      (typeof msg.message?.content === "string"
+        ? msg.message.content
+        : typeof msg.content === "string"
+          ? msg.content
+          : undefined);
+    return content;
+  }
+
+  function shouldRenderMessage(msg: MessageData): boolean {
+    const messageRole = msg?.message?.role ?? msg?.role;
+    if (messageRole === "system" || messageRole === "tool") return false;
+    if (msg?.tool) return false;
+
+    const visibility = getVisibility(msg);
+    if (visibility === "internal") return false;
+
+    const rawText = getRawText(msg);
+    if (!rawText || rawText.trim() === "") return false;
+    return true;
   }
 
   // Show loading skeleton
@@ -290,28 +344,11 @@ export const WidgetChatScreen = () => {
             </div>
           )}
           {/* Render messages */}
-          {sorted.map((msg: any) => {
-            // debug text and its role from backend
-            console.log("MSG DEBUG:", {
-              text: msg.text || msg.content,
-              role: msg.role,
-              messageRole: msg.message?.role,
-              msgContactSessionId: msg.contactSessionId,
-              myContactSessionId: contactSessionId,
-              userId: msg.userId,
-            });
+          {sorted.map((msg) => {
+            if (!shouldRenderMessage(msg as MessageData)) return null;
             // Determine role, the main function to know if the message is from user or bot
-            const role = getRole(msg);
-            // Clear "(no content)" so we can filter
-            const rawText =
-              msg.text ??
-              (typeof msg.message?.content === "string"
-                ? msg.message.content
-                : msg.content);
-
-            // SKIP rendering if text is empty/null.
-            // This will remove empty bubble glitch when bot is about to answer.
-            if (!rawText || rawText.trim() === "") return null;
+            const role = getRole(msg as MessageData);
+            const rawText = getRawText(msg as MessageData);
 
             // if the message is from user, function is to determine what icon and position of message
             const isUser = role === "user";
@@ -443,7 +480,7 @@ export const WidgetChatScreen = () => {
             </Button>
           </form>
           {/* Resolved Notice */}
-            <div>
+          <div>
             {(isResolved || isEscalated) && (
               <p className="text-xs text-muted-foreground text-center mt-2">
                 {isResolved

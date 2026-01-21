@@ -35,7 +35,7 @@ export default defineSchema({
     status: v.union(
       v.literal("unresolved"),
       v.literal("escalated"),
-      v.literal("resolved")
+      v.literal("resolved"),
     ),
   })
     .index("by_organization_id", ["organizationId"])
@@ -48,6 +48,7 @@ export default defineSchema({
     email: v.string(),
     organizationId: v.string(),
     expiresAt: v.number(),
+    isAnonymous: v.optional(v.boolean()),
     metadata: v.optional(
       v.object({
         userAgent: v.optional(v.string()),
@@ -62,7 +63,7 @@ export default defineSchema({
         cookieEnabled: v.optional(v.boolean()),
         referrer: v.optional(v.string()),
         currentUrl: v.optional(v.string()),
-      })
+      }),
     ),
   })
     .index("by_organization_id", ["organizationId"])

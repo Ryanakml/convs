@@ -32,7 +32,7 @@ export const WidgetLoadingScreen = ({
   const setWidgetSettings = useSetAtom(widgetSettingsAtom);
 
   const contactSessionId = useAtomValue(
-    contactSessionIdFamily(organizationId || "")
+    contactSessionIdFamily(organizationId || ""),
   );
 
   const loadingMessage = useAtomValue(loadingMessageAtom);
@@ -81,8 +81,27 @@ export const WidgetLoadingScreen = ({
   ]);
 
   const validateContactSession = useMutation(
-    api.public.contactSession.validate
+    api.public.contactSession.validate,
   );
+  const createAnonymousSession = useMutation(
+    api.public.contactSession.createAnonymous,
+  );
+
+  // Helper to collect metadata
+  const getMetadata = () => ({
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    languages: navigator.languages.join(", "),
+    platform: navigator.platform,
+    vendor: navigator.vendor,
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+    viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZoneOffset: new Date().getTimezoneOffset(),
+    cookieEnabled: navigator.cookieEnabled,
+    referrer: document.referrer || "direct",
+    currentUrl: window.location.href,
+  });
 
   useEffect(() => {
     if (step !== "session") {
@@ -91,33 +110,52 @@ export const WidgetLoadingScreen = ({
 
     setLoadingMessage("Finding contact session...");
 
-    if (!contactSessionId) {
-      setSessionValid(false);
-      setStep("setting");
-      return;
-    }
-
-    setLoadingMessage("Validating contact session...");
-
-    validateContactSession({
-      contactSessionId: contactSessionId,
-    })
-      .then((result) => {
-        setSessionValid(result.valid);
-        setStep("setting");
+    if (contactSessionId) {
+      // Session exists, validate it
+      setLoadingMessage("Validating contact session...");
+      validateContactSession({
+        contactSessionId: contactSessionId,
       })
-      .catch(() => {
+        .then((result) => {
+          setSessionValid(result.valid);
+          setStep("setting");
+        })
+        .catch(() => {
+          setSessionValid(false);
+          setStep("setting");
+        });
+    } else {
+      // No session exists, create anonymous one automatically
+      if (!organizationId) {
         setSessionValid(false);
         setStep("setting");
-      });
+        return;
+      }
+
+      setLoadingMessage("Creating anonymous session...");
+      createAnonymousSession({
+        organizationId,
+        metadata: getMetadata(),
+      })
+        .then((newSessionId) => {
+          // The atom will be updated automatically since it uses localStorage
+          setSessionValid(true);
+          setStep("setting");
+        })
+        .catch(() => {
+          setSessionValid(false);
+          setStep("setting");
+        });
+    }
   }, [
     step,
     contactSessionId,
+    organizationId,
     setLoadingMessage,
     validateContactSession,
+    createAnonymousSession,
     setStep,
   ]);
-
 
   // to do
   const widgetSettings = useQuery(
@@ -126,7 +164,7 @@ export const WidgetLoadingScreen = ({
       ? {
           organizationId: organizationId,
         }
-      : "skip"
+      : "skip",
   );
 
   useEffect(() => {
@@ -141,7 +179,6 @@ export const WidgetLoadingScreen = ({
       setStep("vapi");
     }
   }, [step, widgetSettings, setWidgetSettings, setStep, setLoadingMessage]);
-
 
   const getVapiSecrets = useAction(api.public.secrets.getVapiSecrets);
   useEffect(() => {
@@ -170,8 +207,8 @@ export const WidgetLoadingScreen = ({
     if (step !== "done") {
       return;
     }
-    const hasValidSession = sessionValid;
-    setScreen(hasValidSession ? "selection" : "auth");
+    // Skip auth screen if session is valid (anonymous or user-provided)
+    setScreen(sessionValid ? "selection" : "auth");
   }, [step, sessionValid, setScreen]);
 
   useEffect(() => {

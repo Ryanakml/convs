@@ -109,9 +109,7 @@ export const ConversationIdView = ({
     if (messageRole === "user") return "user";
     if (
       messageRole === "assistant" ||
-      messageRole === "bot" ||
-      messageRole === "system" ||
-      messageRole === "tool"
+      messageRole === "bot"
     ) {
       return "assistant";
     }
@@ -133,6 +131,28 @@ export const ConversationIdView = ({
     }
 
     return "assistant";
+  }
+
+  const TOOL_TAG_PATTERN = /<\s*search\b[\s\S]*?>/i;
+
+  function getRawText(msg: any) {
+    return (
+      msg.text ??
+      (typeof msg.message?.content === "string"
+        ? msg.message.content
+        : msg.content)
+    );
+  }
+
+  function shouldRenderMessage(msg: any) {
+    const messageRole = msg?.message?.role ?? msg?.role;
+    if (messageRole === "system" || messageRole === "tool") return false;
+    if (msg?.tool) return false;
+
+    const rawText = getRawText(msg);
+    if (!rawText || rawText.trim() === "") return false;
+    if (TOOL_TAG_PATTERN.test(rawText)) return false;
+    return true;
   }
 
   const isFirstPageLoading = status === "LoadingFirstPage";
@@ -371,14 +391,9 @@ export const ConversationIdView = ({
             </div>
           ) : (
             sorted.map((msg: any) => {
+              if (!shouldRenderMessage(msg)) return null;
               const role = getRole(msg);
-              const rawText =
-                msg.text ??
-                (typeof msg.message?.content === "string"
-                  ? msg.message.content
-                  : msg.content);
-
-              if (!rawText || rawText.trim() === "") return null;
+              const rawText = getRawText(msg);
 
               const isCustomer = role === "user";
               const isMySide = !isCustomer;

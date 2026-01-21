@@ -21,7 +21,7 @@ export const WidgetInboxScreen = () => {
   const setScreen = useSetAtom(screenAtom);
   const organizationId = useAtomValue(organizationIdAtom);
   const contactSessionId = useAtomValue(
-    contactSessionIdFamily(organizationId || "")
+    contactSessionIdFamily(organizationId || ""),
   );
 
   const setConversationId = useSetAtom(conversationIdAtom);
@@ -35,8 +35,27 @@ export const WidgetInboxScreen = () => {
       : "skip",
     {
       initialNumItems: 10,
-    }
+    },
   );
+
+  const getVisibility = (message: any) => {
+    return (
+      message?.providerOptions?.meta?.visibility ??
+      message?.message?.providerOptions?.meta?.visibility ??
+      message?.meta?.visibility
+    );
+  };
+
+  const getLastMessageText = (lastMessage: any) => {
+    if (getVisibility(lastMessage) === "internal") return "";
+    const rawText =
+      lastMessage?.text ??
+      (typeof lastMessage?.message?.content === "string"
+        ? lastMessage.message.content
+        : lastMessage?.content);
+    if (!rawText) return "";
+    return rawText;
+  };
   return (
     <>
       <div className="flex flex-col h-full">
@@ -89,23 +108,30 @@ export const WidgetInboxScreen = () => {
                   setScreen("chat");
                 }}
                 variant="outline"
-                className="w-full h-16 justify-between rounded-xl bg-accent-foreground"
+                // Perubahan: Hapus bg-accent-foreground, ganti ke bg-card, tambah padding p-4
+                className="w-full h-20 justify-start rounded-xl bg-card hover:bg-accent p-4 mb-2 transition-colors border shadow-sm"
               >
-                <div className="flex flex-col w-full gap-y-2 overflow-hidden text-start">
+                <div className="flex flex-col w-full gap-y-1 overflow-hidden text-start">
                   <div className="flex w-full items-center justify-between gap-x-2">
-                    <p className="text-muted-foreground text-xs">Chat</p>
-                    <p className="text-muted-foreground text-xs">
+                    {/* Warna teks diubah ke primary agar lebih terbaca */}
+                    <p className="text-primary font-medium text-xs">Chat</p>
+                    <p className="text-muted-foreground text-[10px]">
                       {formatDistanceToNow(
-                        new Date(conversation._creationTime)
+                        new Date(conversation._creationTime),
+                        { addSuffix: true },
                       )}
                     </p>
                   </div>
 
                   <div className="flex items-center justify-between w-full gap-x-2">
-                    <p className="truncate text-sm">
-                      {conversation.lastMessage?.text}
+                    {/* Preview pesan dibuat lebih kontras */}
+                    <p className="truncate text-sm text-foreground/80 font-normal">
+                      {getLastMessageText(conversation.lastMessage) ||
+                        "New conversation"}
                     </p>
-                    <ConversationStatusIcon status={conversation.status} />
+                    <div className="shrink-0">
+                      <ConversationStatusIcon status={conversation.status} />
+                    </div>
                   </div>
                 </div>
               </Button>

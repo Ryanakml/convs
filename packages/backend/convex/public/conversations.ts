@@ -3,6 +3,7 @@ import { v, ConvexError } from "convex/values";
 import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
 import type { MessageDoc } from "@convex-dev/agent";
+import { isInternalMessage } from "../lib/messageVisibility";
 
 export const getMany = query({
   args: {
@@ -37,7 +38,10 @@ export const getMany = query({
         });
 
         if (messages.page.length > 0) {
-          lastMessage = messages.page[0] ?? null;
+          const visible = messages.page.find(
+            (message) => !isInternalMessage(message)
+          );
+          lastMessage = visible ?? null;
         }
 
         return {

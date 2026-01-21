@@ -3,6 +3,11 @@ import { generateText } from "ai";
 import { StorageActionWriter } from "convex/server";
 import { assert } from "convex-helpers";
 import { Id } from "../_generated/dataModel";
+import {
+  EXTRACT_TEXT_HTML_INSTRUCTION,
+  EXTRACT_TEXT_PDF_INSTRUCTION,
+  EXTRACT_TEXT_SYSTEM_PROMPTS,
+} from "./extractTextPrompts";
 
 const AI_MODELS = {
   // Use a vision-capable model for binary/image inputs.
@@ -18,13 +23,6 @@ const SUPPORT_IMAGE_TYPE = [
   "image/webp",
   "image/gif",
 ] as const;
-
-const SYSTEM_PROMPT = {
-  image:
-    "You turn image into text. If it is a photo of a document, transcribe it. If it is not a document, describe it.",
-  pdf: "You transform PDF files into text.",
-  html: "You transform content into markdown",
-};
 
 export type extractTextContentArgs = {
   storageId: Id<"_storage">;
@@ -77,7 +75,7 @@ async function extractTextFileContent(
   if (mimeType.toLowerCase() !== "text/plain") {
     const result = await generateText({
       model: AI_MODELS.html,
-      system: SYSTEM_PROMPT.html,
+      system: EXTRACT_TEXT_SYSTEM_PROMPTS.html,
       messages: [
         {
           role: "user",
@@ -88,7 +86,7 @@ async function extractTextFileContent(
             },
             {
               type: "text",
-              text: "Extract the text and print it in markdown format without explaining that you'll do so.",
+              text: EXTRACT_TEXT_HTML_INSTRUCTION,
             },
           ],
         },
@@ -108,7 +106,7 @@ async function extractPdfText(
 ): Promise<string> {
   const result = await generateText({
     model: AI_MODELS.pdf,
-    system: SYSTEM_PROMPT.pdf,
+    system: EXTRACT_TEXT_SYSTEM_PROMPTS.pdf,
     messages: [
       {
         role: "user",
@@ -121,7 +119,7 @@ async function extractPdfText(
           },
           {
             type: "text",
-            text: "Extract the text from the PDF and print it without explaining you'll do so.",
+            text: EXTRACT_TEXT_PDF_INSTRUCTION,
           },
         ],
       },
@@ -134,7 +132,7 @@ async function extractPdfText(
 async function extractImageText(url: string): Promise<string> {
   const result = await generateText({
     model: AI_MODELS.image,
-    system: SYSTEM_PROMPT.image,
+    system: EXTRACT_TEXT_SYSTEM_PROMPTS.image,
     messages: [
       {
         role: "user",

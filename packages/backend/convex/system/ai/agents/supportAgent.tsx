@@ -1,9 +1,18 @@
 import { groq } from "@ai-sdk/groq";
 import { Agent } from "@convex-dev/agent";
 import { components } from "../../../_generated/api";
+import { SUPPORT_AGENT_INSTRUCTIONS } from "../prompts";
+import { escalateConversation } from "../tools/escalateConversation";
+import { resolveConversation } from "../tools/resolveConversation";
+import { search } from "../tools/search";
 
 export const supportAgent = new Agent(components.agent, {
   name: "support-agent",
-  languageModel: groq("llama-3.1-8b-instant"),
-  instructions: `You are a helpful support agent. Use "resolveConversatio" tool when user expresses finalization of the conversation. Use "escalateConversation" tool when user expresses frustration, or requests a human explicitly.`,
+  languageModel: groq("llama3-70b-8192"),
+  instructions: SUPPORT_AGENT_INSTRUCTIONS,
+  tools: {
+    search,
+    escalateConversation,
+    resolveConversation,
+  },
 });

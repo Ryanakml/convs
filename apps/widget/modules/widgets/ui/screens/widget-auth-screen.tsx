@@ -15,6 +15,7 @@ import { useMutation } from "convex/react";
 import { api } from "@workspace/backend/_generated/api";
 import { Doc } from "@workspace/backend/_generated/dataModel";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useState } from "react";
 import {
   contactSessionIdFamily,
   organizationIdAtom,
@@ -30,8 +31,10 @@ export const WidgetAuthScreen = () => {
   const setScreen = useSetAtom(screenAtom);
   const organizationId = useAtomValue(organizationIdAtom);
   const setContactSessionId = useSetAtom(
-    contactSessionIdFamily(organizationId || "")
+    contactSessionIdFamily(organizationId || ""),
   );
+  const [isSkipping, setIsSkipping] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,26 +44,32 @@ export const WidgetAuthScreen = () => {
   });
 
   const createContactSession = useMutation(api.public.contactSession.create);
+  const createAnonymousSession = useMutation(
+    api.public.contactSession.createAnonymous,
+  );
+
+  // Helper to collect metadata
+  const getMetadata = () => ({
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    languages: navigator.languages.join(", "),
+    platform: navigator.platform,
+    vendor: navigator.vendor,
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+    viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZoneOffset: new Date().getTimezoneOffset(),
+    cookieEnabled: navigator.cookieEnabled,
+    referrer: document.referrer || "direct",
+    currentUrl: window.location.href,
+  });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!organizationId) {
       return;
     }
 
-    const metadata: Doc<"contactSessions">["metadata"] = {
-      userAgent: navigator.userAgent,
-      language: navigator.language,
-      languages: navigator.languages.join(", "),
-      platform: navigator.platform,
-      vendor: navigator.vendor,
-      screenResolution: `${window.screen.width}x${window.screen.height}`,
-      viewportSize: `${window.innerWidth}x${window.innerHeight}`,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      timeZoneOffset: new Date().getTimezoneOffset(),
-      cookieEnabled: navigator.cookieEnabled,
-      referrer: document.referrer || "direct",
-      currentUrl: window.location.href,
-    };
+    const metadata: Doc<"contactSessions">["metadata"] = getMetadata();
 
     const contactSessionId = await createContactSession({
       name: values.name,
@@ -71,6 +80,24 @@ export const WidgetAuthScreen = () => {
 
     setContactSessionId(contactSessionId);
     setScreen("selection");
+  };
+
+  const handleSkip = async () => {
+    if (!organizationId) {
+      return;
+    }
+
+    setIsSkipping(true);
+    try {
+      const newSessionId = await createAnonymousSession({
+        organizationId,
+        metadata: getMetadata(),
+      });
+      setContactSessionId(newSessionId);
+      setScreen("selection");
+    } finally {
+      setIsSkipping(false);
+    }
   };
 
   return (
@@ -99,14 +126,6 @@ export const WidgetAuthScreen = () => {
               </FormItem>
             )}
           />
-        </form>
-      </Form>
-
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 gap-y-4"
-        >
           <FormField
             control={form.control}
             name="email"
@@ -124,7 +143,7 @@ export const WidgetAuthScreen = () => {
             )}
           />
           <Button
-            disabled={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting || isSkipping}
             type="submit"
             size={"lg"}
           >
@@ -133,9 +152,23 @@ export const WidgetAuthScreen = () => {
         </form>
       </Form>
 
-      {/* <div className="flex-1 rounded-2xl border bg-card p-4">
-        Widget Auth Screen
-      </div> */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-muted" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">Or</span>
+        </div>
+      </div>
+
+      <Button
+        variant="outline"
+        size="lg"
+        onClick={handleSkip}
+        disabled={isSkipping || form.formState.isSubmitting}
+      >
+        Continue as Guest
+      </Button>
     </main>
   );
 };
