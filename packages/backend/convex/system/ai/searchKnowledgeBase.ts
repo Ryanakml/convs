@@ -60,7 +60,7 @@ export async function searchKnowledgeBase(
       content: "",
       text: "",
       hit: false,
-      score: best.score,
+      score: best?.score ?? 0,
       numResults: searchResults.length,
     } as const;
   }
