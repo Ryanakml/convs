@@ -9,7 +9,7 @@ interface TranscriptMessages {
 }
 
 export const useVapi = () => {
-  const vapiSecrets = useAtomValue(vapiSecretsAtom);  
+  const vapiSecrets = useAtomValue(vapiSecretsAtom);
   const widgetSettings = useAtomValue(widgetSettingsAtom);
 
   const [vapi, setVapi] = useState<Vapi | null>(null);
@@ -22,7 +22,7 @@ export const useVapi = () => {
 
   useEffect(() => {
     if (!vapiSecrets) {
-      return
+      return;
     }
 
     const vapiInstance = new Vapi(vapiSecrets.publicApiKey);
@@ -68,14 +68,14 @@ export const useVapi = () => {
     return () => {
       vapiInstance?.stop();
     };
-  }, []);
+  }, [vapiSecrets]);
 
   const startCall = () => {
     if (!vapiSecrets || !widgetSettings?.vapiSettings?.assistantId) {
       return;
     }
     setIsConnecting(true);
-    
+
     if (vapi) {
       vapi.start(widgetSettings.vapiSettings?.assistantId);
     }

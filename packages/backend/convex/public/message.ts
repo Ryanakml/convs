@@ -39,7 +39,7 @@ export const create = action({
   handler: async (ctx, args) => {
     const contactSession = await ctx.runQuery(
       internal.system.contactSession.getOne,
-      { contactSessionId: args.contactSessionId }
+      { contactSessionId: args.contactSessionId },
     );
 
     if (!contactSession || contactSession.expiresAt < Date.now()) {
@@ -51,7 +51,7 @@ export const create = action({
 
     const conversation = await ctx.runQuery(
       internal.system.conversations.getByThreadId,
-      { threadId: args.threadId }
+      { threadId: args.threadId },
     );
 
     if (!conversation) {
@@ -87,7 +87,7 @@ export const create = action({
     // Subscription
     const subscription = await ctx.runQuery(
       internal.system.subscriptions.getByOrganizationId,
-      { organizationId: conversation.organizationId }
+      { organizationId: conversation.organizationId },
     );
 
     if (!subscription || subscription.status !== "active") {
@@ -113,7 +113,7 @@ export const create = action({
     // Extract bot messages for context awareness
     const botMessages = previousMessages.page
       .filter(
-        (m: any) => m.message?.role === "assistant" || m.role === "assistant"
+        (m: any) => m.message?.role === "assistant" || m.role === "assistant",
       )
       .map((m: any) => ({
         role: "assistant",
@@ -148,10 +148,10 @@ export const create = action({
       .filter(Boolean) as Array<{ type?: string }>;
 
     const searchMissCount = supportLogs.filter(
-      (log) => log?.type === "search_miss"
+      (log) => log?.type === "search_miss",
     ).length;
     const troubleshootingAttempts = supportLogs.filter(
-      (log) => log?.type === "troubleshooting_attempt"
+      (log) => log?.type === "troubleshooting_attempt",
     ).length;
 
     await supportAgent.saveMessage(ctx, {
@@ -235,7 +235,7 @@ export const create = action({
                     botMessages.length > 0
                       ? botMessages[botMessages.length - 1]?.content.substring(
                           0,
-                          100
+                          100,
                         )
                       : "none",
                 })}`,
@@ -441,8 +441,52 @@ export const getMany = query({
     return {
       ...paginated,
       page: paginated.page.filter(
-        (message: any) => !isInternalMessage(message)
+        (message: any) => !isInternalMessage(message),
       ),
     };
+  },
+});
+
+export const sendBotGreeting = action({
+  args: {
+    threadId: v.string(),
+    contactSessionId: v.id("contactSessions"),
+    greetingText: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const contactSession = await ctx.runQuery(
+      internal.system.contactSession.getOne,
+      { contactSessionId: args.contactSessionId },
+    );
+
+    if (!contactSession || contactSession.expiresAt < Date.now()) {
+      throw new ConvexError({
+        code: "UNAUTHORIZED",
+        message: "Contact session is invalid or expired",
+      });
+    }
+
+    const conversation = await ctx.runQuery(
+      internal.system.conversations.getByThreadId,
+      { threadId: args.threadId },
+    );
+
+    if (!conversation) {
+      throw new ConvexError({
+        code: "NOT_FOUND",
+        message: "Conversation not found for the given thread ID",
+      });
+    }
+
+    // Save bot greeting as a direct bot message (no response generation)
+    await supportAgent.saveMessage(ctx, {
+      threadId: args.threadId,
+      message: {
+        role: "assistant",
+        content: args.greetingText,
+      },
+    });
+
+    return { success: true };
   },
 });

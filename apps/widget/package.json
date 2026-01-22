@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 3001",
+    "dev:widget": "tsup src/index.ts --format iife --globalName Convs --outfile public/widget.js --watch",
     "build": "next build",
     "start": "next start --port 3001",
     "lint": "next lint",

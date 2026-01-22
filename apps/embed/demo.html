@@ -31,10 +31,20 @@
     <div class="container">
       <h1>Convs Widget Demo</h1>
       <p>The widget should appear in the bottom right corner.</p>
+      <p style="color: #999; font-size: 12px; margin-top: 40px">
+        Make sure to: 1. Run "pnpm dev" from root 2. Open this file via HTTP
+        (e.g., with Live Server or python -m http.server) 3. Bot will greet you
+        when you open the chat
+      </p>
     </div>
+    <!-- Production: https://convs-widget.vercel.app/widget.js -->
+    <!-- Development: 
+         Option 1 (Direct from embed dev): http://localhost:3002/widget.js
+         Option 2 (From widget public after build): http://localhost:3001/widget.js
+    -->
     <script
-      src="https://convs-widget.vercel.app/widget.js"
-      data-organization-id="org_36OCAOoXtz8tsb5dTX7PXTQwae7"
+      src="http://localhost:3001/widget.js"
+      data-organization-id="org_36IIVWTF1Gdyv57O1L9pvfYE7vk"
       async
     ></script>
   </body>

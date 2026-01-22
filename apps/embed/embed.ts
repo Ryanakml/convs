@@ -1,43 +1,28 @@
 import { EMBED_CONFIG } from "./config";
 import { CHAT_ICON, CLOSE_ICON } from "./icons";
+import { prefetchWidgetAuth } from "./prefetch";
 
 (function () {
   let iframe: HTMLIFrameElement | null = null;
   let container: HTMLDivElement | null = null;
   let button: HTMLButtonElement | null = null;
+  let shadowRoot: ShadowRoot | null = null;
+  let badge: HTMLDivElement | null = null; // [BARU]
   let isOpen = false;
 
-  // Get configuration from script tag
   let organizationId: string | null = null;
   let position: "bottom-right" | "bottom-left" = EMBED_CONFIG.DEFAULT_POSITION;
 
-  // Try to get the current script
   const currentScript = document.currentScript as HTMLScriptElement;
   if (currentScript) {
     organizationId = currentScript.getAttribute("data-organization-id");
     position =
-      (currentScript.getAttribute("data-position") as
-        | "bottom-right"
-        | "bottom-left") || EMBED_CONFIG.DEFAULT_POSITION;
-  } else {
-    // Fallback: find script tag by src
-    const scripts = document.querySelectorAll('script[src*="embed"]');
-    const embedScript = Array.from(scripts).find((script) =>
-      script.hasAttribute("data-organization-id")
-    ) as HTMLScriptElement;
-
-    if (embedScript) {
-      organizationId = embedScript.getAttribute("data-organization-id");
-      position =
-        (embedScript.getAttribute("data-position") as
-          | "bottom-right"
-          | "bottom-left") || EMBED_CONFIG.DEFAULT_POSITION;
-    }
+      (currentScript.getAttribute("data-position") as any) ||
+      EMBED_CONFIG.DEFAULT_POSITION;
   }
 
-  // Exit if no organization ID
   if (!organizationId) {
-    console.error("Convs Widget: data-organization-id attribute is required");
+    console.error("Convs Widget: data-organization-id is required");
     return;
   }
 
@@ -50,81 +35,198 @@ import { CHAT_ICON, CLOSE_ICON } from "./icons";
   }
 
   function render() {
-    // Create floating action button
+    if (organizationId) {
+      prefetchWidgetAuth(organizationId, EMBED_CONFIG.WIDGET_URL).catch(
+        () => {},
+      );
+    }
+
+    const host = document.createElement("div");
+    host.id = "convs-widget-host";
+    // Styling Host harus se-agresif mungkin agar tidak terpengaruh CSS website lain
+    host.style.setProperty("position", "fixed", "important");
+    host.style.setProperty("bottom", "0", "important");
+    host.style.setProperty(
+      position === "bottom-right" ? "right" : "left",
+      "0",
+      "important",
+    );
+    host.style.setProperty("width", "0", "important");
+    host.style.setProperty("height", "0", "important");
+    host.style.setProperty("z-index", "2147483647", "important");
+    host.style.setProperty("pointer-events", "none", "important");
+    document.body.appendChild(host);
+
+    shadowRoot = host.attachShadow({ mode: "open" });
+
+    const style = document.createElement("style");
+    style.textContent = `
+      :host { all: initial; }
+      .convs-btn {
+        position: absolute !important;
+        bottom: 20px !important;
+        ${position === "bottom-right" ? "right: 20px !important;" : "left: 20px !important;"}
+        width: 60px !important;
+        height: 60px !important;
+        border-radius: 50% !important;
+        background: #3b82f6 !important;
+        box-shadow: 0 4px 24px rgba(59, 130, 246, 0.35) !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: none !important;
+        padding: 0 !important;
+        pointer-events: auto !important;
+        transition: transform 0.2s ease !important;
+        z-index: 999999 !important;
+        color: white !important;
+      }
+      .convs-btn:hover { transform: scale(1.05) !important; }
+
+      /* [BARU] Badge Notification */
+      .convs-badge {
+        position: absolute !important;
+        top: -2px !important;
+        right: -2px !important;
+        width: 14px !important;
+        height: 14px !important;
+        background: #ef4444 !important;
+        border: 2px solid white !important;
+        border-radius: 50% !important;
+        display: none; /* Default sembunyi */
+      }
+      
+      .convs-container {
+        position: absolute !important;
+        bottom: 90px !important;
+        ${position === "bottom-right" ? "right: 20px !important;" : "left: 20px !important;"}
+        width: 400px !important;
+        height: 600px !important;
+        max-width: calc(100vw - 40px) !important;
+        max-height: calc(100vh - 110px) !important;
+        background: white !important;
+        border-radius: 16px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+        overflow: hidden !important;
+        display: none !important;
+        opacity: 0 !important;
+        transform: translateY(20px) !important;
+        transition: all 0.3s ease !important;
+        pointer-events: auto !important;
+        z-index: 999998 !important;
+      }
+      
+      .convs-container.open {
+        display: block !important;
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+      }
+
+      .convs-iframe {
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+      }
+
+      .convs-popup {
+        position: absolute !important;
+        bottom: 90px !important;
+        ${position === "bottom-right" ? "right: 20px !important;" : "left: 20px !important;"}
+        background: white !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        font-family: sans-serif !important;
+        font-size: 14px !important;
+        color: #333 !important;
+        border-left: 4px solid #3b82f6 !important;
+        pointer-events: auto !important;
+        animation: slideUp 0.3s ease !important;
+      }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    shadowRoot.appendChild(style);
+
     button = document.createElement("button");
-    button.id = "convs-widget-button";
+    button.className = "convs-btn";
     button.innerHTML = CHAT_ICON;
-    button.style.cssText = `
-      position: fixed;
-      ${position === "bottom-right" ? "right: 20px;" : "left: 20px;"}
-      bottom: 20px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      cursor: pointer;
-      z-index: 999999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 24px rgba(59, 130, 246, 0.35);
-      transition: all 0.2s ease;
-    `;
+    button.onclick = toggleWidget;
 
-    button.addEventListener("click", toggleWidget);
-    button.addEventListener("mouseenter", () => {
-      if (button) button.style.transform = "scale(1.05)";
-    });
-    button.addEventListener("mouseleave", () => {
-      if (button) button.style.transform = "scale(1)";
-    });
+    // [BARU] Buat Badge
+    badge = document.createElement("div");
+    badge.className = "convs-badge";
+    button.appendChild(badge);
 
-    document.body.appendChild(button);
+    shadowRoot.appendChild(button);
 
-    // Create container (hidden by default)
     container = document.createElement("div");
-    container.id = "convs-widget-container";
-    container.style.cssText = `
-      position: fixed;
-      ${position === "bottom-right" ? "right: 20px;" : "left: 20px;"}
-      bottom: 90px;
-      width: 400px;
-      height: 600px;
-      max-width: calc(100vw - 40px);
-      max-height: calc(100vh - 110px);
-      z-index: 999998;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-      opacity: 0;
-      transform: translateY(20px);
-      display: none;
-      transition: all 0.3s ease;
-    `;
+    container.className = "convs-container";
 
-    // Create iframe
     iframe = document.createElement("iframe");
+    iframe.className = "convs-iframe";
     iframe.src = buildWidgetUrl();
-    iframe.style.cssText = `
-      width: 100%;
-      height: 100%;
-      border: none;
-    `;
-    // Add permissions for microphone and clipboard
     iframe.allow = "microphone; clipboard-read; clipboard-write";
 
     container.appendChild(iframe);
-    document.body.appendChild(container);
+    shadowRoot.appendChild(container);
 
-    // Handle messages from widget
     window.addEventListener("message", handleMessage);
+
+    // Auto show greeting after 3s
+    setTimeout(showGreetingPopup, 3000);
+  }
+
+  function toggleWidget() {
+    isOpen ? hide() : show();
+  }
+
+  function show() {
+    if (container && button && badge) {
+      isOpen = true;
+      container.classList.add("open");
+      button.innerHTML = CLOSE_ICON;
+      badge.style.display = "none"; // Sembunyiin badge pas dibuka
+      hideGreetingPopup();
+    }
+  }
+
+  function hide() {
+    if (container && button && badge) {
+      isOpen = false;
+      container.classList.remove("open");
+      button.innerHTML = CHAT_ICON;
+      button.appendChild(badge); // Re-attach badge
+    }
+  }
+
+  function showGreetingPopup() {
+    if (isOpen || !shadowRoot) return;
+    const greetings = [
+      "Halo! Ada yang bisa saya bantu?",
+      "Saya siap membantu! 🎉",
+    ];
+    const text = greetings[Math.floor(Math.random() * greetings.length)];
+
+    const popup = document.createElement("div");
+    popup.id = "convs-greeting-popup";
+    popup.className = "convs-popup";
+    popup.textContent = text;
+
+    shadowRoot.appendChild(popup);
+    setTimeout(hideGreetingPopup, 5000);
+  }
+
+  function hideGreetingPopup() {
+    shadowRoot?.getElementById("convs-greeting-popup")?.remove();
   }
 
   function buildWidgetUrl(): string {
-    const params = new URLSearchParams();
-    params.append("organizationId", organizationId!);
+    const params = new URLSearchParams({ organizationId: organizationId! });
     return `${EMBED_CONFIG.WIDGET_URL}?${params.toString()}`;
   }
 
@@ -133,99 +235,18 @@ import { CHAT_ICON, CLOSE_ICON } from "./icons";
 
     const { type, payload } = event.data;
 
-    switch (type) {
-      case "close":
-        hide();
-        break;
-      case "resize":
-        if (payload.height && container) {
-          container.style.height = `${payload.height}px`;
-        }
-        break;
+    if (type === "close") hide();
+
+    // [BARU] Handle Notifikasi
+    if (type === "show_notification" && !isOpen && badge) {
+      badge.style.display = "block";
+    }
+
+    // [BARU] Handle Resize otomatis dari iframe
+    if (type === "resize" && payload?.height && container) {
+      container.style.height = `${payload.height}px`;
     }
   }
 
-  function toggleWidget() {
-    if (isOpen) {
-      hide();
-    } else {
-      show();
-    }
-  }
-
-  function show() {
-    if (container && button) {
-      isOpen = true;
-      container.style.display = "block";
-      // Trigger animation
-      setTimeout(() => {
-        if (container) {
-          container.style.opacity = "1";
-          container.style.transform = "translateY(0)";
-        }
-      }, 10);
-      // Change button icon to close
-      button.innerHTML = CLOSE_ICON;
-    }
-  }
-
-  function hide() {
-    if (container && button) {
-      isOpen = false;
-      container.style.opacity = "0";
-      container.style.transform = "translateY(10px)";
-      // Hide after animation
-      setTimeout(() => {
-        if (container) container.style.display = "none";
-      }, 300);
-      // Change button icon back to chat
-      button.innerHTML = CHAT_ICON;
-      button.style.background = "#3b82f6";
-    }
-  }
-
-  function destroy() {
-    window.removeEventListener("message", handleMessage);
-    if (container) {
-      container.remove();
-      container = null;
-      iframe = null;
-    }
-    if (button) {
-      button.remove();
-      button = null;
-    }
-    isOpen = false;
-  }
-
-  // Function to reinitialize with new config
-  function reinit(newConfig: {
-    organizationId?: string;
-    position?: "bottom-right" | "bottom-left";
-  }) {
-    // Destroy existing widget
-    destroy();
-
-    // Update config
-    if (newConfig.organizationId) {
-      organizationId = newConfig.organizationId;
-    }
-    if (newConfig.position) {
-      position = newConfig.position;
-    }
-
-    // Reinitialize
-    init();
-  }
-
-  // Expose API to global scope
-  (window as any).ConvsWidget = {
-    init: reinit,
-    show,
-    hide,
-    destroy,
-  };
-
-  // Start initialization
   init();
 })();

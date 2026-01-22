@@ -15,8 +15,8 @@ export const organizationIdAtom = atom<string | null>(null);
 export const contactSessionIdFamily = atomFamily((organizationIdAtom: string) =>
   atomWithStorage<Id<"contactSessions"> | null>(
     `{CONTACT_SESSION_KEY}_${organizationIdAtom}`,
-    null
-  )
+    null,
+  ),
 );
 
 export const conversationIdAtom = atom<Id<"conversations"> | null>(null);
@@ -24,7 +24,18 @@ export const conversationIdAtom = atom<Id<"conversations"> | null>(null);
 export const widgetSettingsAtom = atom<Doc<"widgetSettings"> | null>(null);
 
 export const vapiSecretsAtom = atom<{
-    publicApiKey: string;
+  publicApiKey: string;
 } | null>(null);
 
 export const hasVapiSecretsAtom = atom((get) => get(vapiSecretsAtom) !== null);
+
+// Greeting notification state
+export const showGreetingAtom = atom<boolean>(false);
+export const greetingMessageAtom = atom<string>(
+  "Hi there! 👋 How can we help?",
+);
+export const unreadCountAtom = atom<number>(0);
+export const hasUnreadMessageAtom = atomWithStorage<boolean>(
+  "convs_has_unread",
+  false,
+);

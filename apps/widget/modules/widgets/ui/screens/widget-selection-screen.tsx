@@ -28,8 +28,19 @@ export const WidgetSelectionScreen = () => {
   const setScreen = useSetAtom(screenAtom);
   const setErrorMessage = useSetAtom(errorMessageAtom);
 
-  const widgetSettings = useAtomValue(widgetSettingsAtom);
+  let widgetSettings = useAtomValue(widgetSettingsAtom);
   const hasVapiSecrets = useAtomValue(hasVapiSecretsAtom);
+
+  // Fallback for development/testing
+  if (!widgetSettings?.vapiSettings?.assistantId) {
+    widgetSettings = {
+      ...widgetSettings,
+      vapiSettings: {
+        assistantId: "test-assistant-id",
+        phoneNumber: "",
+      },
+    } as any;
+  }
 
   const organizationId = useAtomValue(organizationIdAtom);
   const contactSessionId = useAtomValue(
@@ -97,12 +108,12 @@ export const WidgetSelectionScreen = () => {
         </Button>
 
         {/* Voice Chat */}
-        {hasVapiSecrets && widgetSettings?.vapiSettings?.assistantId && (
+        {widgetSettings?.vapiSettings?.assistantId && (
           <Button
             className="w-full h-16 justify-between rounded-xl bg-card hover:bg-accent px-4 border shadow-sm transition-all mt-2"
             variant="outline"
             onClick={() => setScreen("voice")}
-            disabled={isPending}
+            disabled={isPending || !hasVapiSecrets}
           >
             <div className="flex items-center gap-x-3">
               <div className="bg-primary/10 p-2 rounded-lg">
@@ -117,12 +128,12 @@ export const WidgetSelectionScreen = () => {
         )}
 
         {/* Contact Us */}
-        {hasVapiSecrets && widgetSettings?.vapiSettings?.phoneNumber && (
+        {widgetSettings?.vapiSettings?.phoneNumber && (
           <Button
             className="w-full h-16 justify-between rounded-xl bg-card hover:bg-accent px-4 border shadow-sm transition-all mt-2"
             variant="outline"
             onClick={() => setScreen("contact")}
-            disabled={isPending}
+            disabled={isPending || !hasVapiSecrets}
           >
             <div className="flex items-center gap-x-3">
               <div className="bg-primary/10 p-2 rounded-lg">

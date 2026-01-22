@@ -20,6 +20,8 @@ import {
   contactSessionIdFamily,
   organizationIdAtom,
   screenAtom,
+  conversationIdAtom,
+  loadingMessageAtom,
 } from "../../atoms/widget-atoms";
 
 const formSchema = z.object({
@@ -33,6 +35,8 @@ export const WidgetAuthScreen = () => {
   const setContactSessionId = useSetAtom(
     contactSessionIdFamily(organizationId || ""),
   );
+  const setConversationId = useSetAtom(conversationIdAtom);
+  const setLoadingMessage = useSetAtom(loadingMessageAtom);
   const [isSkipping, setIsSkipping] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,6 +51,7 @@ export const WidgetAuthScreen = () => {
   const createAnonymousSession = useMutation(
     api.public.contactSession.createAnonymous,
   );
+  const createConversation = useMutation(api.public.conversations.create);
 
   // Helper to collect metadata
   const getMetadata = () => ({
@@ -79,7 +84,19 @@ export const WidgetAuthScreen = () => {
     });
 
     setContactSessionId(contactSessionId);
-    setScreen("selection");
+
+    // Auto-create conversation and go to chat
+    setLoadingMessage("Starting conversation...");
+    try {
+      const conversationId = await createConversation({
+        organizationId,
+        contactSessionId,
+      });
+      setConversationId(conversationId);
+      setScreen("chat");
+    } catch {
+      setScreen("error");
+    }
   };
 
   const handleSkip = async () => {
@@ -94,7 +111,15 @@ export const WidgetAuthScreen = () => {
         metadata: getMetadata(),
       });
       setContactSessionId(newSessionId);
-      setScreen("selection");
+
+      // Auto-create conversation and go to chat
+      setLoadingMessage("Starting conversation...");
+      const conversationId = await createConversation({
+        organizationId,
+        contactSessionId: newSessionId,
+      });
+      setConversationId(conversationId);
+      setScreen("chat");
     } finally {
       setIsSkipping(false);
     }
