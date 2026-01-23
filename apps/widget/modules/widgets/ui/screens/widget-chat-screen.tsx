@@ -20,6 +20,7 @@ import { format } from "date-fns/format";
 import { AvatarWithBadge } from "@workspace/ui/components/dicebear-avatar";
 import { useVapi } from "../../hooks/use-vapi";
 import { useNotifications } from "../../hooks/use-notifications";
+import { useTheme } from "../../hooks/use-theme";
 
 interface MessageData {
   _id: string;
@@ -49,6 +50,14 @@ export const WidgetChatScreen = () => {
   let widgetSettings = useAtomValue(widgetSettingsAtom);
   const hasVapiSecrets = useAtomValue(hasVapiSecretsAtom);
   const setScreen = useSetAtom(screenAtom);
+  const theme = useTheme();
+
+  // 🔍 DEBUG: Log theme saat component render
+  useEffect(() => {
+    console.log("[ChatScreen] 🎨 Component rendered with theme:", theme);
+    console.log("[ChatScreen] 🔍 Background:", theme.colors.background);
+    console.log("[ChatScreen] 🔍 Primary:", theme.colors.primary);
+  }, [theme]);
 
   // Fallback for development/testing
   if (!widgetSettings?.vapiSettings?.assistantId) {
@@ -58,7 +67,7 @@ export const WidgetChatScreen = () => {
         assistantId: "test-assistant-id",
         phoneNumber: "",
       },
-    } as any;
+    } as unknown as typeof widgetSettings;
   }
 
   const contactSessionId = useAtomValue(
@@ -260,11 +269,20 @@ export const WidgetChatScreen = () => {
 
   if (conversationId && (!conversation || isFirstPageLoading)) {
     return (
-      <div className="w-full h-screen flex flex-col">
+      <div
+        className="w-full h-screen flex flex-col"
+        style={{ backgroundColor: theme.colors.background }}
+      >
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
+            <Loader2
+              className="h-6 w-6 animate-spin"
+              style={{ color: theme.colors.mutedForeground }}
+            />
+            <p
+              className="text-sm"
+              style={{ color: theme.colors.mutedForeground }}
+            >
               Loading conversation...
             </p>
           </div>
@@ -274,9 +292,18 @@ export const WidgetChatScreen = () => {
   }
 
   return (
-    <div className="w-full h-screen flex flex-col bg-white">
+    <div
+      className="w-full h-screen flex flex-col"
+      style={{ backgroundColor: theme.colors.background }}
+    >
       {/* Simplified Header with Phone Call Button */}
-      <div className="border-b px-4 py-3 flex items-center justify-between bg-white">
+      <div
+        className="border-b px-4 py-3 flex items-center justify-between"
+        style={{
+          borderColor: theme.colors.border,
+          backgroundColor: theme.components.header.bg,
+        }}
+      >
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
             <AvatarWithBadge
@@ -287,8 +314,16 @@ export const WidgetChatScreen = () => {
             />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-foreground">Mike</p>
-            <p className="text-xs text-muted-foreground">
+            <p
+              className="font-semibold"
+              style={{ color: theme.colors.foreground }}
+            >
+              Mike
+            </p>
+            <p
+              className="text-xs"
+              style={{ color: theme.colors.mutedForeground }}
+            >
               {isResolved ? "Resolved" : isEscalated ? "Escalated" : "Active"}
             </p>
           </div>
@@ -298,7 +333,9 @@ export const WidgetChatScreen = () => {
           <Button
             size="icon"
             variant="ghost"
-            className="text-primary hover:bg-primary/10"
+            style={{
+              color: theme.colors.primary,
+            }}
             disabled={isConnecting || !hasVapiSecrets}
             onClick={() => {
               if (!hasVapiSecrets) {
@@ -316,16 +353,33 @@ export const WidgetChatScreen = () => {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 bg-white space-y-4">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+        style={{
+          backgroundColor: theme.colors.background,
+          gap: theme.spacing.messageGap,
+        }}
+      >
         {sorted.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center py-12">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
+              style={{
+                backgroundColor: theme.colors.primary + "15", // 15% opacity
+              }}
+            >
               <span className="text-xl">💬</span>
             </div>
-            <p className="text-sm font-medium text-foreground mb-1">
+            <p
+              className="text-sm font-medium mb-1"
+              style={{ color: theme.colors.foreground }}
+            >
               Start a conversation
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p
+              className="text-xs"
+              style={{ color: theme.colors.mutedForeground }}
+            >
               Send a message to begin chatting
             </p>
           </div>
@@ -359,22 +413,39 @@ export const WidgetChatScreen = () => {
 
               <div className={cn("max-w-xs", isUser && "text-right")}>
                 <div
-                  className={cn(
-                    "px-3 py-2 rounded-lg text-sm break-words",
+                  className="px-3 py-2 rounded-lg text-sm break-words"
+                  style={
                     isUser
-                      ? "bg-blue-500 text-white rounded-br-none"
-                      : "bg-gray-100 text-gray-900 rounded-bl-none",
-                  )}
+                      ? {
+                          backgroundColor: theme.colors.userMessage.bg,
+                          color: theme.colors.userMessage.text,
+                          borderBottomRightRadius: "0",
+                        }
+                      : {
+                          backgroundColor: theme.colors.assistantMessage.bg,
+                          color: theme.colors.assistantMessage.text,
+                          borderBottomLeftRadius: "0",
+                        }
+                  }
                 >
                   {rawText}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: theme.colors.mutedForeground }}
+                >
                   {format(new Date(msg._creationTime), "HH:mm")}
                 </p>
               </div>
 
               {isUser && (
-                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 text-sm text-white">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm"
+                  style={{
+                    backgroundColor: theme.colors.userMessage.bg,
+                    color: theme.colors.userMessage.text,
+                  }}
+                >
                   👤
                 </div>
               )}
@@ -392,16 +463,33 @@ export const WidgetChatScreen = () => {
                 badgeClassName="border-white"
               />
             </div>
-            <div className="bg-gray-100 text-gray-900 px-3 py-2 rounded-lg rounded-bl-none">
+            <div
+              className="px-3 py-2 rounded-lg rounded-bl-none"
+              style={{
+                backgroundColor: theme.colors.assistantMessage.bg,
+                color: theme.colors.assistantMessage.text,
+              }}
+            >
               <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
                 <span
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                  style={{ animationDelay: "150ms" }}
+                  className="w-2 h-2 rounded-full animate-bounce"
+                  style={{
+                    backgroundColor: theme.colors.assistantMessage.text + "99",
+                  }}
                 />
                 <span
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                  style={{ animationDelay: "300ms" }}
+                  className="w-2 h-2 rounded-full animate-bounce"
+                  style={{
+                    backgroundColor: theme.colors.assistantMessage.text + "99",
+                    animationDelay: "150ms",
+                  }}
+                />
+                <span
+                  className="w-2 h-2 rounded-full animate-bounce"
+                  style={{
+                    backgroundColor: theme.colors.assistantMessage.text + "99",
+                    animationDelay: "300ms",
+                  }}
                 />
               </div>
             </div>
@@ -412,7 +500,13 @@ export const WidgetChatScreen = () => {
       </div>
 
       {/* Input Area */}
-      <div className="border-t bg-white p-4">
+      <div
+        className="border-t p-4"
+        style={{
+          borderColor: theme.colors.border,
+          backgroundColor: theme.colors.background,
+        }}
+      >
         <form className="flex items-end gap-2" onSubmit={handleSend}>
           <div className="flex-1">
             <Textarea
@@ -429,6 +523,11 @@ export const WidgetChatScreen = () => {
               }
               disabled={!canSend || isSending}
               className="min-h-[44px] max-h-[120px] resize-none rounded-lg"
+              style={{
+                backgroundColor: theme.components.input.bg,
+                borderColor: theme.colors.border,
+                color: theme.colors.foreground,
+              }}
               rows={1}
             />
           </div>
@@ -437,6 +536,17 @@ export const WidgetChatScreen = () => {
             size="icon"
             disabled={!message.trim() || !threadId || !canSend || isSending}
             className="h-10 w-10 flex-shrink-0"
+            style={
+              !message.trim() || !threadId || !canSend || isSending
+                ? {
+                    backgroundColor: theme.components.button.disabled.bg,
+                    color: theme.components.button.disabled.text,
+                  }
+                : {
+                    backgroundColor: theme.colors.primary,
+                    color: theme.colors.primaryForeground,
+                  }
+            }
           >
             {isSending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

@@ -2,9 +2,13 @@ import { atom } from "jotai";
 import { atomFamily, atomWithStorage } from "jotai/utils";
 import { WidgetScreen } from "../types";
 import { Doc, Id } from "@workspace/backend/_generated/dataModel";
+import { ThemeConfig, defaultTheme } from "../theme/theme";
 
 // Basic widget state atom
 export const screenAtom = atom<WidgetScreen>("loading");
+
+// Theme atom - centralized theme configuration
+export const themeAtom = atom<ThemeConfig>(defaultTheme);
 
 export const errorMessageAtom = atom<string | null>(null);
 

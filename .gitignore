@@ -39,3 +39,5 @@ npm-debug.log*
 # Else
 demo.html
 context.txt
+*.md
+*.sh

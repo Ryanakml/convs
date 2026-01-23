@@ -51,7 +51,11 @@ export const WidgetLoadingScreen = ({
   const setVapiSecrets = useSetAtom(vapiSecretsAtom);
   const setWidgetSettings = useSetAtom(widgetSettingsAtom);
   const setShowGreeting = useSetAtom(showGreetingAtom);
+  const setContactSessionId = useSetAtom(
+    contactSessionIdFamily(organizationId || ""),
+  );
 
+  // Only read contactSessionId when organizationId is set to avoid stale atom keys
   const contactSessionId = useAtomValue(
     contactSessionIdFamily(organizationId || ""),
   );
@@ -187,12 +191,15 @@ export const WidgetLoadingScreen = ({
         organizationId,
         metadata: getMetadata(),
       })
-        .then(() => {
-          // The atom will be updated automatically since it uses localStorage
+        .then((sessionId) => {
+          console.log("[Widget] Anonymous session created:", sessionId);
+          // Store the session ID in the atom (which saves to localStorage)
+          setContactSessionId(sessionId);
           setSessionValid(true);
           setStep("setting");
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error("[Widget] Failed to create anonymous session:", error);
           setSessionValid(false);
           setStep("setting");
         });
@@ -206,6 +213,7 @@ export const WidgetLoadingScreen = ({
     createAnonymousSession,
     isPrefetched,
     setStep,
+    setContactSessionId,
   ]);
 
   // to do
@@ -226,11 +234,35 @@ export const WidgetLoadingScreen = ({
     setLoadingMessage("Loading widget settings...");
 
     if (widgetSettings !== undefined) {
-      console.log("Widget settings loaded:", widgetSettings);
+      console.log(
+        "[Widget Loading] 📦 Widget settings loaded from Convex:",
+        widgetSettings,
+      );
+      console.log(
+        "[Widget Loading] 🎨 Theme settings in data:",
+        widgetSettings?.themeSettings,
+      );
+
+      // 🔍 DEBUG: Log specific color values
+      if (widgetSettings?.themeSettings?.colors) {
+        console.log(
+          "[Widget Loading] 🔍 Background color from backend:",
+          widgetSettings.themeSettings.colors.background,
+        );
+        console.log(
+          "[Widget Loading] 🔍 Primary color from backend:",
+          widgetSettings.themeSettings.colors.primary,
+        );
+      }
+
+      console.log("[Widget Loading] 🔄 Setting to widgetSettingsAtom NOW...");
       setWidgetSettings(widgetSettings);
+      console.log("[Widget Loading] ✅ widgetSettingsAtom updated!");
       setStep("vapi");
     } else {
-      console.log("Widget settings still loading or not found");
+      console.log(
+        "[Widget Loading] ⏳ Widget settings still loading or not found",
+      );
     }
   }, [step, widgetSettings, setWidgetSettings, setStep, setLoadingMessage]);
 
@@ -283,7 +315,19 @@ export const WidgetLoadingScreen = ({
     }
 
     // Auto-create conversation and go to chat
+    console.log(
+      "[Widget] Creating conversation - orgId:",
+      organizationId,
+      "sessionId:",
+      contactSessionId,
+    );
     if (!organizationId || !contactSessionId) {
+      console.error(
+        "[Widget] Missing required data - orgId:",
+        organizationId,
+        "sessionId:",
+        contactSessionId,
+      );
       setScreen("error");
       setErrorMessage("Missing required data");
       return;

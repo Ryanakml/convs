@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Greeting Pill Demo</title>
+    <style>
+      /* Reset dasar untuk demo */
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: #f0f2f5;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #333;
+      }
+
+      /* --- CSS Utama Widget --- */
+
+      /* Container utama tombol */
+      .greeting-pill-widget {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        /* Ukuran awal (Lingkaran) */
+        width: 60px;
+        height: 60px;
+        background-color: #0066ff; /* Warna Biru */
+        border-radius: 30px; /* Membuatnya bulat sempurna di awal */
+        box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        /* Overflow hidden penting agar teks tidak bocor saat mengecil */
+        overflow: hidden;
+        /* Animasi untuk width dan border-radius agar halus */
+        transition:
+          width 0.5s ease-in-out,
+          border-radius 0.5s ease-in-out;
+        z-index: 1000;
+        /* Padding kiri agar icon tidak terlalu mepet saat mode pill */
+        padding-left: 0;
+      }
+
+      /* Icon Wrapper (untuk menampung SVG) */
+      .widget-icon {
+        width: 60px; /* Lebar tetap untuk area icon */
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0; /* Mencegah icon tergencet */
+      }
+
+      /* Styling SVG Icon */
+      .widget-icon svg {
+        width: 28px;
+        height: 28px;
+        fill: white;
+      }
+
+      /* Teks Sapaan */
+      .widget-text {
+        color: white;
+        white-space: nowrap; /* Mencegah teks wrap ke baris baru */
+        font-weight: 500;
+        font-size: 15px;
+        /* Keadaan awal teks: hidden dan invisible */
+        opacity: 0;
+        visibility: hidden;
+        /* Transisi fade efek untuk teks */
+        transition:
+          opacity 0.4s ease-in-out,
+          visibility 0.4s;
+        /* Delay sedikit agar width melebar dulu baru teks muncul */
+        transition-delay: 0.1s;
+        padding-right: 20px; /* Jarak di kanan teks */
+      }
+
+      /* --- STATE 2: EKSPANSI (Pill Mode) --- */
+      /* Class ini ditambahkan via JS */
+      .greeting-pill-widget.expanded {
+        /* Lebar target saat ekspansi */
+        width: 240px;
+        /* Sedikit penyesuaian radius jika ingin bentuk pill yang lebih kotak, 
+                tapi membiarkannya 30px juga bagus untuk pill rounded penuh */
+        /* border-radius: 25px; */
+      }
+
+      /* Menampilkan teks saat expanded */
+      .greeting-pill-widget.expanded .widget-text {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* --- STATE 4: NOTIFIKASI BADGE --- */
+      /* Menggunakan pseudo-element ::after untuk badge merah */
+      .greeting-pill-widget.has-notification::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 14px;
+        height: 14px;
+        background-color: #ff3b30; /* Merah notifikasi */
+        border: 2px solid #ffffff; /* Border putih agar kontras */
+        border-radius: 50%;
+        box-sizing: border-box;
+        /* Animasi pop-in kecil untuk badge */
+        animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      /* Keyframes untuk animasi badge */
+      @keyframes badgePop {
+        0% {
+          transform: scale(0);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p>Tunggu 3 detik, widget di pojok kanan bawah akan menyapa.</p>
+
+    <div class="greeting-pill-widget" id="chatWidget">
+      <div class="widget-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"
+          />
+        </svg>
+      </div>
+      <div class="widget-text">Halo! Ada yang bisa dibantu?</div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const chatWidget = document.getElementById("chatWidget");
+
+        // Waktu tunggu sebelum ekspansi dimulai (3 detik)
+        const startDelay = 3000;
+        // Durasi pesan terlihat sebelum mengecil lagi (5 detik)
+        const displayDuration = 5000;
+
+        // 1. State Awal (0-3 Detik):
+        // Widget sudah dalam kondisi default (lingkaran) berkat CSS.
+
+        // 2. Trigger State Ekspansi (Detik ke-3)
+        setTimeout(() => {
+          // Menambahkan class 'expanded' memicu transisi CSS width dan fade-in teks
+          chatWidget.classList.add("expanded");
+
+          // 3. Trigger State Mengecil Kembali (Detik ke-8)
+          // Dijalankan 5 detik setelah ekspansi dimulai
+          setTimeout(() => {
+            // Menghapus class 'expanded' membuat widget kembali ke bentuk awal
+            chatWidget.classList.remove("expanded");
+
+            // 4. State Notifikasi (Persistent)
+            // Munculkan badge merah segera setelah mulai mengecil
+            chatWidget.classList.add("has-notification");
+          }, displayDuration);
+        }, startDelay);
+
+        // Opsional: Menghapus notifikasi jika user mengklik widget
+        chatWidget.addEventListener("click", () => {
+          // Aksi membuka chat window sebenarnya di sini...
+          console.log("Widget diklik, membuka chat...");
+
+          // Hapus badge notifikasi setelah diklik
+          if (chatWidget.classList.contains("has-notification")) {
+            chatWidget.classList.remove("has-notification");
+          }
+
+          // (Opsional) Jika ingin widget tetap melebar setelah diklik:
+          // chatWidget.classList.add('expanded');
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -19,6 +19,76 @@ export default defineSchema({
       assistantId: v.optional(v.string()),
       phoneNumber: v.optional(v.string()),
     }),
+    // Theme configuration for widget customization
+    themeSettings: v.optional(
+      v.object({
+        colors: v.object({
+          primary: v.string(),
+          primaryForeground: v.string(),
+          secondary: v.string(),
+          secondaryForeground: v.string(),
+          background: v.string(),
+          foreground: v.string(),
+          userMessage: v.object({
+            bg: v.string(),
+            text: v.string(),
+          }),
+          assistantMessage: v.object({
+            bg: v.string(),
+            text: v.string(),
+          }),
+          border: v.string(),
+          mutedForeground: v.string(),
+          muted: v.string(),
+        }),
+        components: v.object({
+          header: v.object({
+            bg: v.string(),
+            borderColor: v.string(),
+            textColor: v.string(),
+          }),
+          input: v.object({
+            bg: v.string(),
+            borderColor: v.string(),
+            textColor: v.string(),
+            placeholderColor: v.string(),
+          }),
+          button: v.object({
+            primary: v.object({
+              bg: v.string(),
+              text: v.string(),
+              hover: v.string(),
+            }),
+            ghost: v.object({
+              bg: v.string(),
+              text: v.string(),
+              hover: v.string(),
+            }),
+            disabled: v.object({
+              bg: v.string(),
+              text: v.string(),
+            }),
+          }),
+          avatar: v.object({
+            bg: v.string(),
+            border: v.string(),
+          }),
+          indicator: v.object({
+            speaking: v.string(),
+            listening: v.string(),
+          }),
+        }),
+        spacing: v.object({
+          messageGap: v.string(),
+          padding: v.string(),
+          borderRadius: v.string(),
+        }),
+        animations: v.object({
+          enabled: v.boolean(),
+          transitionDuration: v.string(),
+        }),
+      }),
+    ),
   }).index("by_organization_id", ["organizationId"]),
 
   plugins: defineTable({
